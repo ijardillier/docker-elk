@@ -11,3 +11,13 @@ xpack.monitoring.ui.container.elasticsearch.enabled: true
 #
 elasticsearch.username: elastic
 elasticsearch.password: changeme
+
+logging.json: true
+logging.verbose: false
+
+# Sends cluster statistics to Elastic.
+telemetry.enabled: true
+
+# Changes the Node Listing to display the CPU utilization based on the reported Cgroup statistics.
+monitoring.ui.container.elasticsearch.enabled: true
+monitoring.ui.container.logstash.enabled: true

@@ -1,0 +1,77 @@
+tags: [ "docker-elk" ]
+fields:
+  env: "dev"
+fields_under_root: true
+
+metricbeat.config:
+  modules:
+    path: ${path.config}/modules.d/*.yml
+    reload.enabled: true
+    reload.period: 10s
+
+metricbeat.autodiscover:
+  providers:
+    - type: docker
+      hints.enabled: true
+
+metricbeat.modules:
+
+- module: docker
+  metricsets:
+    - "container"
+    - "cpu"
+    - "diskio"
+    - "healthcheck"
+    - "info"
+    - "memory"
+    - "network"
+  hosts: ["unix:///var/run/docker.sock"]
+  period: 10s
+  enabled: true
+
+- module: prometheus
+  period: 10s
+  metricsets: ["collector"]
+  hosts: ["prometheus:9090"]
+  metrics_path: /metrics
+  use_types: true
+  rate_counters: false
+
+- module: prometheus
+  period: 10s
+  metricsets: ["query"]
+  hosts: ["prometheus:9090"]
+  queries:
+  - name: 'myapp_metrics'
+    path: '/api/v1/query'
+    params:
+      query: "{__name__=~'myapp.*'}"
+  
+processors:
+  - add_cloud_metadata: ~
+
+# output.logstash:
+#   hosts: ["logstash:5000"]
+
+output.elasticsearch:
+  hosts: ["http://elasticsearch:9200"]
+  username: elastic
+  password: changeme
+  
+setup.template:
+  overwrite: true
+  settings.index:
+    number_of_shards: 1
+    number_of_replicas: 1
+
+setup.kibana:
+  host: "kibana:5601"
+  protocol: "http"
+  username: "elastic"
+  password: "changeme"
+  space.id: ""
+
+logging.level: warning
+logging.json: true
+logging.metrics.enabled: true
+logging.ecs: true

@@ -1,11 +1,37 @@
 version: '3.2'
 
 services:
+
+  prometheus:
+    build:
+      context: prometheus/
+      args:
+        PROMETHEUS_VERSION: $PROMETHEUS_VERSION
+    container_name: prometheus
+    volumes:
+      - type: bind
+        source: ./prometheus/config/prometheus.yml
+        target: /usr/share/prometheus/config/prometheus.yml
+        read_only: true
+      - type: volume
+        source: prometheus
+        target: /usr/share/prometheus/data
+    command:
+      - '--config.file=/usr/share/prometheus/config/prometheus.yml'
+      #- '--storage.tsdb.path=/prometheus'
+      #- '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      #- '--web.console.templates=/usr/share/prometheus/consoles'
+    ports:
+      - "9090:9090"
+    networks:
+      - default
+
   elasticsearch:
     build:
       context: elasticsearch/
       args:
         ELK_VERSION: $ELK_VERSION
+    container_name: elasticsearch_1
     volumes:
       - type: bind
         source: ./elasticsearch/config/elasticsearch.yml
@@ -18,19 +44,20 @@ services:
       - "9200:9200"
       - "9300:9300"
     environment:
-      ES_JAVA_OPTS: "-Xmx256m -Xms256m"
+      ES_JAVA_OPTS: "-Xmx512m -Xms512m"
       ELASTIC_PASSWORD: changeme
       # Use single node discovery in order to disable production mode and avoid bootstrap checks
       # see https://www.elastic.co/guide/en/elasticsearch/reference/current/bootstrap-checks.html
       discovery.type: single-node
     networks:
-      - elk
+      - default
 
   logstash:
     build:
       context: logstash/
       args:
         ELK_VERSION: $ELK_VERSION
+    container_name: logstash
     volumes:
       - type: bind
         source: ./logstash/config/logstash.yml
@@ -47,7 +74,7 @@ services:
     environment:
       LS_JAVA_OPTS: "-Xmx256m -Xms256m"
     networks:
-      - elk
+      - default
     depends_on:
       - elasticsearch
 
@@ -56,6 +83,7 @@ services:
       context: kibana/
       args:
         ELK_VERSION: $ELK_VERSION
+    container_name: kibana
     volumes:
       - type: bind
         source: ./kibana/config/kibana.yml
@@ -64,13 +92,62 @@ services:
     ports:
       - "5601:5601"
     networks:
-      - elk
+      - default
     depends_on:
       - elasticsearch
 
+  metricbeat:
+    build:
+      context: metricbeat/
+      args:
+        ELK_VERSION: $ELK_VERSION
+    container_name: metricbeat
+    user: root
+    volumes:
+      - type: bind
+        source: ./metricbeat/config/metricbeat.yml
+        target: /usr/share/metricbeat/metricbeat.yml
+        read_only: true
+      - /proc:/hostfs/proc:ro
+      - /sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro
+      - /:/hostfs:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: metricbeat -e -strict.perms=false -system.hostfs=/hostfs
+    environment:
+      LS_JAVA_OPTS: "-Xmx64m -Xms64m"
+    networks:
+      - default
+    depends_on:
+      - elasticsearch
+      - kibana
+
+  filebeat:
+    build:
+      context: filebeat/
+      args:
+        ELK_VERSION: $ELK_VERSION
+    container_name: filebeat
+    user: root
+    volumes:
+      - type: bind
+        source: ./filebeat/config/filebeat.yml
+        target: /usr/share/filebeat/filebeat.yml
+        read_only: true
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "/var/lib/docker/containers:/var/lib/docker/containers:ro"
+    command: filebeat -e -strict.perms=false
+    environment:
+      LS_JAVA_OPTS: "-Xmx64m -Xms64m"
+    networks:
+      - default
+    depends_on:
+      - elasticsearch
+      - kibana
+
 networks:
-  elk:
+  default:
     driver: bridge
 
 volumes:
   elasticsearch:
+  prometheus:

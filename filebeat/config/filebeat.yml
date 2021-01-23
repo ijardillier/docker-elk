@@ -1,0 +1,50 @@
+tags: [ "docker-elk" ]
+fields:
+  env: "dev"
+fields_under_root: true
+
+filebeat.config:
+  modules:
+    path: ${path.config}/modules.d/*.yml
+    reload.enabled: false
+    reload.period: 10s
+
+filebeat.autodiscover:
+  providers:
+    - type: docker
+      hints.enabled: true
+
+processors:
+- add_cloud_metadata: ~
+- decode_json_fields:
+    fields: ["message"]
+    process_array: false
+    max_depth: 1
+    target: ""
+    overwrite_keys: true
+
+# output.logstash:
+#   hosts: ["logstash:5000"]
+
+output.elasticsearch:
+  hosts: ["http://elasticsearch:9200"]
+  username: elastic
+  password: changeme
+
+setup.template:
+  overwrite: true
+  settings.index:
+    number_of_shards: 1
+    number_of_replicas: 1
+
+setup.kibana:
+  host: "kibana:5601"
+  protocol: "http"
+  username: "elastic"
+  password: "changeme"
+  space.id: ""
+
+logging.level: warning
+logging.json: true
+logging.metrics.enabled: false
+logging.ecs: false
