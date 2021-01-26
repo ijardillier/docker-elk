@@ -46,9 +46,18 @@ metricbeat.modules:
     path: '/api/v1/query'
     params:
       query: "{__name__=~'myapp.*'}"
-  
+
+# - module: prometheus
+#   period: 10s
+#   metricsets: ["collector"]
+#   hosts: ["host.docker.internal:9091"]
+#   metrics_path: /metrics
+#   use_types: true
+#   rate_counters: false
+
 processors:
   - add_cloud_metadata: ~
+  - add_docker_metadata: ~
 
 # output.logstash:
 #   hosts: ["logstash:5000"]
