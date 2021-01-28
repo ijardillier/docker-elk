@@ -47,13 +47,15 @@ metricbeat.modules:
     params:
       query: "{__name__=~'myapp.*'}"
 
-# - module: prometheus
-#   period: 10s
-#   metricsets: ["collector"]
-#   hosts: ["host.docker.internal:9091"]
-#   metrics_path: /metrics
-#   use_types: true
-#   rate_counters: false
+- module: prometheus
+  period: 10s
+  metricsets: ["collector"]
+  hosts: ["host.docker.internal:9091"]
+  metrics_path: /metrics
+  metrics_filters:
+    include: ["myapp*"]
+  use_types: true
+  rate_counters: false
 
 processors:
   - add_cloud_metadata: ~
@@ -72,6 +74,8 @@ setup.template:
   settings.index:
     number_of_shards: 1
     number_of_replicas: 1
+
+setup.ilm.overwrite: true
 
 setup.kibana:
   host: "kibana:5601"

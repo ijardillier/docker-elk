@@ -38,6 +38,8 @@ setup.template:
     number_of_shards: 1
     number_of_replicas: 1
 
+setup.ilm.overwrite: true
+
 setup.kibana:
   host: "kibana:5601"
   protocol: "http"
