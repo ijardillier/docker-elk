@@ -68,8 +68,8 @@ services:
         target: /usr/share/logstash/pipeline
         read_only: true
     ports:
-      - "5000:5000/tcp"
-      - "5000:5000/udp"
+      - "5044:5044/tcp"
+      - "5044:5044/udp"
       - "9600:9600"
     environment:
       LS_JAVA_OPTS: "-Xmx256m -Xms256m"
@@ -133,7 +133,7 @@ services:
         source: ./filebeat/config/filebeat.yml
         target: /usr/share/filebeat/filebeat.yml
         read_only: true
-      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
       - "/var/lib/docker/containers:/var/lib/docker/containers:ro"
     command: filebeat -e -strict.perms=false
     environment:

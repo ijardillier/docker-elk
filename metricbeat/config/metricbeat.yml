@@ -57,23 +57,31 @@ metricbeat.modules:
   use_types: true
   rate_counters: false
 
+- module: prometheus
+  period: 10s
+  metricsets: ["collector"]
+  hosts: ["api-testapm:5101"]
+  metrics_path: /metrics
+  use_types: true
+  rate_counters: false
+
 processors:
   - add_cloud_metadata: ~
   - add_docker_metadata: ~
 
-# output.logstash:
-#   hosts: ["logstash:5000"]
+output.logstash:
+  hosts: ["logstash:5044"]
 
-output.elasticsearch:
-  hosts: ["http://elasticsearch:9200"]
-  username: elastic
-  password: changeme
+# output.elasticsearch:
+#   hosts: ["http://elasticsearch:9200"]
+#   username: elastic
+#   password: changeme
   
 setup.template:
   overwrite: true
   settings.index:
     number_of_shards: 1
-    number_of_replicas: 1
+    number_of_replicas: 0
 
 setup.ilm.overwrite: true
 

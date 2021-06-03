@@ -24,21 +24,25 @@ processors:
     target: ""
     overwrite_keys: true
 
-# output.logstash:
-#   hosts: ["logstash:5000"]
+output.logstash:
+  hosts: ["logstash:5044"]
 
-output.elasticsearch:
-  hosts: ["http://elasticsearch:9200"]
-  username: elastic
-  password: changeme
+# output.elasticsearch:
+#   hosts: ["http://elasticsearch:9200"]
+#   username: elastic
+#   password: changeme
 
 setup.template:
   overwrite: true
   settings.index:
     number_of_shards: 1
-    number_of_replicas: 1
+    number_of_replicas: 0
 
-setup.ilm.overwrite: true
+setup.ilm:
+  enabled: auto
+  # rollover_alias: "filebeat"
+  # pattern: "-000001"
+  overwrite: true
 
 setup.kibana:
   host: "kibana:5601"
