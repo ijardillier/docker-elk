@@ -1,23 +1,10 @@
+apm-server:
+  host: 0.0.0.0:8200
+
 tags: [ "docker-elk" ]
 fields:
   env: "dev"
 fields_under_root: true
-
-filebeat.config:
-  modules:
-    path: ${path.config}/modules.d/*.yml
-    reload.enabled: true
-    reload.period: 10s
-
-filebeat.autodiscover:
-  providers:
-    - type: docker
-      hints.enabled: true
-      appenders:
-      - type: config
-        config:
-          ignore_older: 72h
-          close_inactive: 1h
 
 processors:
 - add_host_metadata: ~
@@ -29,13 +16,11 @@ processors:
     target: ""
     overwrite_keys: true
 
-output.logstash:
-  hosts: ["logstash:5044"]
-
-# output.elasticsearch:
-#   hosts: ["http://elasticsearch:9200"]
-#   username: elastic
-#   password: changeme
+output:
+  elasticsearch:
+    hosts: ['http://elasticsearch:9200']
+    username: elastic
+    password: changeme
 
 setup.template:
   overwrite: true
@@ -44,11 +29,11 @@ setup.template:
     number_of_replicas: 0
 
 # Only if direct output to elasticsearch. Won't be used if logstash output. 
-setup.ilm:
-  enabled: auto
-  rollover_alias: "filebeat" # should be set with basic licence
-  pattern: "-000001" # should be set with basic licence
-  overwrite: true
+# setup.ilm:
+#   enabled: auto
+#   rollover_alias: "apm" # should be set with basic licence
+#   pattern: "-000001" # should be set with basic licence
+#   overwrite: true
 
 setup.kibana:
   host: "kibana:5601"

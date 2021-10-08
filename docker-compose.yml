@@ -1,12 +1,9 @@
-version: '3.2'
+version: '3.8'
 
 services:
 
   prometheus:
-    build:
-      context: prometheus/
-      args:
-        PROMETHEUS_VERSION: $PROMETHEUS_VERSION
+    image: prom/prometheus:${PROMETHEUS_VERSION}
     container_name: prometheus
     volumes:
       - type: bind
@@ -27,10 +24,7 @@ services:
       - default
 
   elasticsearch:
-    build:
-      context: elasticsearch/
-      args:
-        ELK_VERSION: $ELK_VERSION
+    image: docker.elastic.co/elasticsearch/elasticsearch:${ELK_VERSION}
     container_name: elasticsearch_1
     volumes:
       - type: bind
@@ -44,7 +38,7 @@ services:
       - "9200:9200"
       - "9300:9300"
     environment:
-      ES_JAVA_OPTS: "-Xmx512m -Xms512m"
+      ES_JAVA_OPTS: "-Xmx1024m -Xms1024m"
       ELASTIC_PASSWORD: changeme
       # Use single node discovery in order to disable production mode and avoid bootstrap checks
       # see https://www.elastic.co/guide/en/elasticsearch/reference/current/bootstrap-checks.html
@@ -53,10 +47,7 @@ services:
       - default
 
   logstash:
-    build:
-      context: logstash/
-      args:
-        ELK_VERSION: $ELK_VERSION
+    image: docker.elastic.co/logstash/logstash:${ELK_VERSION}
     container_name: logstash
     volumes:
       - type: bind
@@ -72,17 +63,14 @@ services:
       - "5044:5044/udp"
       - "9600:9600"
     environment:
-      LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+      LS_JAVA_OPTS: "-Xmx512m -Xms512m"
     networks:
       - default
     depends_on:
       - elasticsearch
 
   kibana:
-    build:
-      context: kibana/
-      args:
-        ELK_VERSION: $ELK_VERSION
+    image: docker.elastic.co/kibana/kibana:${ELK_VERSION}
     container_name: kibana
     volumes:
       - type: bind
@@ -97,10 +85,7 @@ services:
       - elasticsearch
 
   metricbeat:
-    build:
-      context: metricbeat/
-      args:
-        ELK_VERSION: $ELK_VERSION
+    image: docker.elastic.co/beats/metricbeat:${ELK_VERSION}
     container_name: metricbeat
     user: root
     volumes:
@@ -114,7 +99,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     command: metricbeat -e -strict.perms=false -system.hostfs=/hostfs
     environment:
-      LS_JAVA_OPTS: "-Xmx64m -Xms64m"
+      LS_JAVA_OPTS: "-Xmx128m -Xms128m"
     networks:
       - default
     depends_on:
@@ -122,10 +107,7 @@ services:
       - kibana
 
   filebeat:
-    build:
-      context: filebeat/
-      args:
-        ELK_VERSION: $ELK_VERSION
+    image: docker.elastic.co/beats/filebeat:${ELK_VERSION}
     container_name: filebeat
     user: root
     volumes:
@@ -137,12 +119,26 @@ services:
       - "/var/lib/docker/containers:/var/lib/docker/containers:ro"
     command: filebeat -e -strict.perms=false
     environment:
-      LS_JAVA_OPTS: "-Xmx64m -Xms64m"
+      LS_JAVA_OPTS: "-Xmx128m -Xms128m"
     networks:
       - default
     depends_on:
       - elasticsearch
       - kibana
+
+  apm-server:
+    image: docker.elastic.co/apm/apm-server:${ELK_VERSION}
+    container_name: apm-server
+    volumes:
+      - ./apm-server/config/apm-server.yml:/usr/share/apm-server/apm-server.yml:ro
+    ports:
+      - "8200:8200"
+    environment:
+      BEAT_STRICT_PERMS: "false"
+    networks:
+      - default
+    depends_on:
+      - elasticsearch
 
 networks:
   default:

@@ -29,44 +29,60 @@ metricbeat.modules:
   period: 10s
   enabled: true
 
+# - module: prometheus
+#   period: 10s
+#   metricsets: ["collector"]
+#   hosts: ["prometheus:9090"]
+#   metrics_path: /metrics
+#   use_types: true
+#   rate_counters: false
+
+# - module: prometheus
+#   period: 10s
+#   metricsets: ["query"]
+#   hosts: ["prometheus:9090"]
+#   queries:
+#   - name: 'myapp_metrics'
+#     path: '/api/v1/query'
+#     params:
+#       query: "{__name__=~'myapp.*'}"
+
+# - module: prometheus
+#   period: 10s
+#   metricsets: ["collector"]
+#   hosts: ["host.docker.internal:9091"]
+#   metrics_path: /metrics
+#   metrics_filters:
+#     include: ["myapp*"]
+#   use_types: true
+#   rate_counters: false
+
+# - module: prometheus
+#   period: 10s
+#   metricsets: ["collector"]
+#   hosts: ["api-testapm:5101"]
+#   metrics_path: /metrics
+#   use_types: true
+#   rate_counters: false
+
 - module: prometheus
   period: 10s
   metricsets: ["collector"]
-  hosts: ["prometheus:9090"]
+  hosts: ["host.docker.internal:8081"]
   metrics_path: /metrics
   use_types: true
   rate_counters: false
 
 - module: prometheus
   period: 10s
-  metricsets: ["query"]
-  hosts: ["prometheus:9090"]
-  queries:
-  - name: 'myapp_metrics'
-    path: '/api/v1/query'
-    params:
-      query: "{__name__=~'myapp.*'}"
-
-- module: prometheus
-  period: 10s
   metricsets: ["collector"]
-  hosts: ["host.docker.internal:9091"]
-  metrics_path: /metrics
-  metrics_filters:
-    include: ["myapp*"]
-  use_types: true
-  rate_counters: false
-
-- module: prometheus
-  period: 10s
-  metricsets: ["collector"]
-  hosts: ["api-testapm:5101"]
+  hosts: ["host.docker.internal:8084"]
   metrics_path: /metrics
   use_types: true
   rate_counters: false
 
 processors:
-  - add_cloud_metadata: ~
+  - add_host_metadata: ~
   - add_docker_metadata: ~
 
 output.logstash:
