@@ -1,7 +1,62 @@
-tags: [ "docker-elk" ]
-fields:
-  env: "dev"
-fields_under_root: true
+---
+######################## Filebeat Configuration ############################
+
+# This file is aan extract of the full configuration example documenting 
+# all non-deprecated options in comments. 
+# For the full configuration example: 
+# https://github.com/elastic/beats/blob/main/filebeat/filebeat.reference.yml
+# For a shorter configuration example, that contains only the most common options: 
+# https://github.com/elastic/beats/blob/main/filebeat/filebeat.yml
+#
+# You can find the full configuration reference here:
+# https://www.elastic.co/guide/en/beats/filebeat/current/index.html
+
+# =========================== Filebeat autodiscover ============================
+# Autodiscover allows you to detect changes in the system and spawn new modules
+# or inputs as they happen.
+
+filebeat.autodiscover:
+  providers:
+    - type: docker
+      hints.enabled: true
+      templates:
+        - condition:
+            contains:
+              docker.container.image: elasticsearch
+          config:
+            - module: elasticsearch
+              log:
+                input:
+                  type: container
+                  paths:
+                    - /var/lib/docker/containers/${data.docker.container.id}/*.log
+        - condition:
+            contains:
+              docker.container.image: kibana
+          config:
+            - module: kibana
+              log:
+                input:
+                  type: container
+                  paths:
+                    - /var/lib/docker/containers/${data.docker.container.id}/*.log
+        - condition:
+            contains:
+              docker.container.image: logstash
+          config:
+            - module: logstash
+              log:
+                input:
+                  type: container
+                  paths:
+                    - /var/lib/docker/containers/${data.docker.container.id}/*.log
+      appenders:
+      - type: config
+        config:
+          ignore_older: 72h
+          close_inactive: 1h
+
+# ========================== Filebeat global options ===========================
 
 filebeat.config:
   modules:
@@ -9,19 +64,23 @@ filebeat.config:
     reload.enabled: true
     reload.period: 10s
 
-filebeat.autodiscover:
-  providers:
-    - type: docker
-      hints.enabled: true
-      appenders:
-      - type: config
-        config:
-          ignore_older: 72h
-          close_inactive: 1h
+# ================================== General ==================================
+
+name: filebeat
+tags: [ "docker-elk" ]
+fields:
+  env: "dev"
+fields_under_root: true
+
+# ================================= Processors =================================
+# Processors are used to reduce the number of fields in the exported event or to
+# enhance the event with external metadata.
 
 processors:
 - add_host_metadata: ~
 - add_docker_metadata: ~
+- add_locale:
+    format: offset
 - decode_json_fields:
     fields: ["message"]
     process_array: false
@@ -29,26 +88,63 @@ processors:
     target: ""
     overwrite_keys: true
 
-output.logstash:
-  hosts: ["logstash:5044"]
+# ================================== Outputs ===================================
+# Configure what output to use when sending the data collected by the beat.
 
-# output.elasticsearch:
-#   hosts: ["http://elasticsearch:9200"]
-#   username: elastic
-#   password: changeme
+# ---------------------------- Elasticsearch Output ----------------------------
+
+output.elasticsearch:
+  hosts: ["http://elasticsearch:9200"]
+  username: elastic
+  password: changeme
+
+# ------------------------------ Logstash Output -------------------------------
+
+# output.logstash:
+#   hosts: ["logstash:5044"]
+
+# ================================= Dashboards =================================
+# These settings control loading the sample dashboards to the Kibana index. Loading
+# the dashboards are disabled by default and can be enabled either by setting the
+# options here, or by using the `-setup` CLI flag or the `setup` command.
+
+setup.dashboards:
+  enable: true
+  #index: ?
+
+# ================================== Template ==================================
+# A template is used to set the mapping in Elasticsearch
+# By default template loading is enabled and the template is loaded.
+# These settings can be adjusted to load your own template or overwrite existing ones.
 
 setup.template:
+  enable: true
   overwrite: true
-  settings.index:
-    number_of_shards: 1
-    number_of_replicas: 0
+  #name: "filebeat-%{[agent.version]}"
+  #pattern: "filebeat-%{[agent.version]}"
+  #json:
+    #path: "${path.config}/template.json"
+    #name: ""
+    #data_stream: true
+  settings:
+    index:
+      number_of_shards: 1
+      number_of_replicas: 0
 
-# Only if direct output to elasticsearch. Won't be used if logstash output. 
+# ====================== Index Lifecycle Management (ILM) ======================
+# Configure index lifecycle management (ILM) to manage the backing indices
+# of your data streams.
+
 setup.ilm:
-  enabled: auto
-  rollover_alias: "filebeat" # should be set with basic licence
-  pattern: "-000001" # should be set with basic licence
-  overwrite: true
+  enabled: true
+  policy_name: "filebeat" 
+  #policy_file: /path
+  check_exists: true
+  overwrite: false
+
+# =================================== Kibana ===================================
+# Starting with Beats version 6.0.0, the dashboards are loaded via the Kibana API.
+# This requires a Kibana endpoint configuration.
 
 setup.kibana:
   host: "kibana:5601"
@@ -57,7 +153,30 @@ setup.kibana:
   password: "changeme"
   space.id: ""
 
-logging.level: warning
-logging.json: true
-logging.metrics.enabled: false
-logging.ecs: false
+# ================================== Logging ===================================
+# There are four options for the log output: file, stderr, syslog, eventlog
+# The file output is the default.
+
+logging:
+  level: info
+  json: true
+  metrics:
+    enabled: false
+    #period: 30s
+
+# ============================= X-Pack Monitoring ==============================
+# Filebeat can export internal metrics to a central Elasticsearch monitoring
+# cluster.  This requires xpack monitoring to be enabled in Elasticsearch.  The
+# reporting is disabled by default.
+
+monitoring.enabled: false
+
+# =============================== HTTP Endpoint ================================
+# Each beat can expose internal metrics through a HTTP endpoint. For security
+# reasons the endpoint is disabled by default. This feature is currently experimental.
+# Stats can be access through http://localhost:5066/stats . For pretty JSON output
+# append ?pretty to the URL.
+
+http.enabled: true
+http.host: 0.0.0.0
+http.port: 5066

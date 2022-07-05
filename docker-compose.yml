@@ -8,16 +8,11 @@ services:
     volumes:
       - type: bind
         source: ./prometheus/config/prometheus.yml
-        target: /usr/share/prometheus/config/prometheus.yml
+        target: /etc/prometheus/prometheus.yml
         read_only: true
       - type: volume
         source: prometheus
         target: /usr/share/prometheus/data
-    command:
-      - '--config.file=/usr/share/prometheus/config/prometheus.yml'
-      #- '--storage.tsdb.path=/prometheus'
-      #- '--web.console.libraries=/usr/share/prometheus/console_libraries'
-      #- '--web.console.templates=/usr/share/prometheus/consoles'
     ports:
       - "9090:9090"
     networks:
@@ -40,38 +35,13 @@ services:
     environment:
       ES_JAVA_OPTS: "-Xmx1024m -Xms1024m"
       ELASTIC_PASSWORD: changeme
-      # Use single node discovery in order to disable production mode and avoid bootstrap checks
-      # see https://www.elastic.co/guide/en/elasticsearch/reference/current/bootstrap-checks.html
-      discovery.type: single-node
     networks:
       - default
-
-  logstash:
-    image: docker.elastic.co/logstash/logstash:${ELK_VERSION}
-    container_name: logstash
-    volumes:
-      - type: bind
-        source: ./logstash/config/logstash.yml
-        target: /usr/share/logstash/config/logstash.yml
-        read_only: true
-      - type: bind
-        source: ./logstash/pipeline
-        target: /usr/share/logstash/pipeline
-        read_only: true
-    ports:
-      - "5044:5044/tcp"
-      - "5044:5044/udp"
-      - "9600:9600"
-    environment:
-      LS_JAVA_OPTS: "-Xmx512m -Xms512m"
-    networks:
-      - default
-    depends_on:
-      - elasticsearch
 
   kibana:
     image: docker.elastic.co/kibana/kibana:${ELK_VERSION}
     container_name: kibana
+    restart: on-failure
     volumes:
       - type: bind
         source: ./kibana/config/kibana.yml
@@ -84,10 +54,32 @@ services:
     depends_on:
       - elasticsearch
 
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:${ELK_VERSION}
+    container_name: filebeat
+    user: root
+    restart: on-failure
+    volumes:
+      - type: bind
+        source: ./filebeat/config/filebeat.yml
+        target: /usr/share/filebeat/filebeat.yml
+        read_only: true
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "/var/lib/docker/containers:/var/lib/docker/containers:ro"
+    command: filebeat -e -strict.perms=false
+    environment:
+      LS_JAVA_OPTS: "-Xmx128m -Xms128m"
+    networks:
+      - default
+    depends_on:
+      - elasticsearch
+      - kibana
+
   metricbeat:
     image: docker.elastic.co/beats/metricbeat:${ELK_VERSION}
     container_name: metricbeat
     user: root
+    restart: on-failure
     volumes:
       - type: bind
         source: ./metricbeat/config/metricbeat.yml
@@ -106,31 +98,45 @@ services:
       - elasticsearch
       - kibana
 
-  filebeat:
-    image: docker.elastic.co/beats/filebeat:${ELK_VERSION}
-    container_name: filebeat
-    user: root
+  logstash:
+    image: docker.elastic.co/logstash/logstash:${ELK_VERSION}
+    container_name: logstash
+    restart: on-failure
     volumes:
       - type: bind
-        source: ./filebeat/config/filebeat.yml
-        target: /usr/share/filebeat/filebeat.yml
+        source: ./logstash/config/logstash.yml
+        target: /usr/share/logstash/config/logstash.yml
         read_only: true
-      - "/var/run/docker.sock:/var/run/docker.sock:ro"
-      - "/var/lib/docker/containers:/var/lib/docker/containers:ro"
-    command: filebeat -e -strict.perms=false
+      - type: bind
+        source: ./logstash/config/pipelines.yml
+        target: /usr/share/logstash/config/pipelines.yml
+        read_only: true
+      - type: bind
+        source: ./logstash/pipeline
+        target: /usr/share/logstash/pipeline
+        read_only: true
+      - type: volume
+        source: logstash_data
+        target: /usr/share/logstash/data
+    ports:
+      - "5044:5044/tcp"
+      - "5044:5044/udp"
+      - "9600:9600"
     environment:
-      LS_JAVA_OPTS: "-Xmx128m -Xms128m"
+      LS_JAVA_OPTS: "-Xmx512m -Xms512m"
     networks:
       - default
     depends_on:
       - elasticsearch
-      - kibana
 
   apm-server:
     image: docker.elastic.co/apm/apm-server:${ELK_VERSION}
     container_name: apm-server
     volumes:
-      - ./apm-server/config/apm-server.yml:/usr/share/apm-server/apm-server.yml:ro
+      - type: bind
+        source: ./apm-server/config/apm-server.yml
+        target: /usr/share/apm-server/apm-server.yml
+        read_only: true
     ports:
       - "8200:8200"
     environment:
@@ -147,3 +153,4 @@ networks:
 volumes:
   elasticsearch:
   prometheus:
+  logstash_data:

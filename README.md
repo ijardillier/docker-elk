@@ -31,6 +31,7 @@ Based on the official Docker images from Elastic:
     - [Cleanup](#cleanup)
   - [Initial setup](#initial-setup)
     - [Setting up user authentication](#setting-up-user-authentication)
+    - [Loadgin ingest pipelines](#loadgin-ingest-pipelines)
     - [Injecting data](#injecting-data)
     - [Injecting logs and metrics from our stack](#injecting-logs-and-metrics-from-our-stack)
     - [Default Kibana index pattern creation](#default-kibana-index-pattern-creation)
@@ -106,8 +107,6 @@ $ docker-compose up
 
 You can also run all services in the background (detached mode) by adding the `-d` flag to the above command.
 
-> You must run `docker-compose build` first whenever you switch branch or update a base image.
-
 If you are starting the stack for the very first time, please read the section below attentively.
 
 ### Cleanup
@@ -131,13 +130,13 @@ The stack is pre-configured with the following **privileged** bootstrap user:
 * user: *elastic*
 * password: *changeme*
 
-Although all stack components work out-of-the-box with this user, we strongly recommend using the unprivileged [built-in
-users][builtin-users] instead for increased security. 
+Since v8 of Elastic stack, components won't work with this user, you have to configure the unprivileged [built-in users][builtin-users] after start of elasticsearch node. 
 
 1. Initialize passwords for built-in users
 
 ```console
-$ docker-compose exec -T elasticsearch bin/elasticsearch-setup-passwords auto --batch
+$ docker container exec -it elasticsearch_1 /bin/bash
+elasticsearch@...:~$ bin/elasticsearch-setup-passwords interactive
 ```
 
 Passwords for all 6 built-in users will be randomly generated. Take note of them.
@@ -149,11 +148,11 @@ Remove the `ELASTIC_PASSWORD` environment variable from the `elasticsearch` serv
 
 3. Replace usernames and passwords in configuration files
 
-Use the `kibana_system` user inside the Kibana configuration file (`kibana/config/kibana.yml`) 
+Update the `kibana_system` password inside the Kibana configuration file (`kibana/config/kibana.yml`).
 
-Use the `logstash_system` user inside the Logstash configuration file (`logstash/config/logstash.yml`) in place of the existing `elastic` user.
+Update the `logstash_system` password inside the Logstash configuration file (`logstash/config/logstash.yml`).
 
-Use the `beats_system` user inside the Beats (Filebeat and Metricbeat) configuration files (`filebeat/config/filebeat.yml` and `metricbeat/config/metricbeat.yml`). Use `kibana_system` for Kibana setup.
+Update the `beats_system` password inside the Beats (Filebeat and Metricbeat) configuration files (`filebeat/config/filebeat.yml` and `metricbeat/config/metricbeat.yml`). Update `kibana_system` password for Kibana setup.
 
 Replace the password for the `elastic` user inside the Logstash pipeline file (`logstash/pipeline/logstash.conf`).
 
@@ -170,6 +169,13 @@ $ docker-compose restart kibana logstash filebeat metricbeat
 ```
 
 > Learn more about the security of the Elastic stack at [Tutorial: Getting started with security][sec-tutorial].
+
+### Loadgin ingest pipelines
+
+```console
+$ docker container exec -it filebeat /bin/bash
+filebeat@...:~$ filebeat setup --pipelines --modules system,elasticsearch,kibana,logstash
+```
 
 ### Injecting data
 
