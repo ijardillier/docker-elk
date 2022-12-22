@@ -79,7 +79,7 @@ pipeline.workers: 2
 # of ECS for the individual pipeline in its `pipelines.yml` definition. Setting
 # it here will set the default for _all_ pipelines, including new ones.
 #
-pipeline.ecs_compatibility: v1
+pipeline.ecs_compatibility: v8
 #
 # ------------ Pipeline Configuration Settings --------------
 #
@@ -323,48 +323,12 @@ log.level: info
 # X-Pack Monitoring
 # https://www.elastic.co/guide/en/logstash/current/monitoring-logstash.html
 xpack.monitoring.enabled: false
-xpack.monitoring.elasticsearch.username: logstash_system
-xpack.monitoring.elasticsearch.password: changeme
-#xpack.monitoring.elasticsearch.proxy: ["http://proxy:port"]
-#xpack.monitoring.elasticsearch.hosts: ["https://es1:9200", "https://es2:9200"]
-# an alternative to hosts + username/password settings is to use cloud_id/cloud_auth
-#xpack.monitoring.elasticsearch.cloud_id: monitoring_cluster_id:xxxxxxxxxx
-#xpack.monitoring.elasticsearch.cloud_auth: logstash_system:password
-# another authentication alternative is to use an Elasticsearch API key
-#xpack.monitoring.elasticsearch.api_key: "id:api_key"
-#xpack.monitoring.elasticsearch.ssl.certificate_authority: "/path/to/ca.crt"
-#xpack.monitoring.elasticsearch.ssl.ca_trusted_fingerprint: xxxxxxxxxx
-#xpack.monitoring.elasticsearch.ssl.truststore.path: path/to/file
-#xpack.monitoring.elasticsearch.ssl.truststore.password: password
-#xpack.monitoring.elasticsearch.ssl.keystore.path: /path/to/file
-#xpack.monitoring.elasticsearch.ssl.keystore.password: password
-#xpack.monitoring.elasticsearch.ssl.verification_mode: certificate
-#xpack.monitoring.elasticsearch.sniffing: false
-#xpack.monitoring.collection.interval: 10s
-#xpack.monitoring.collection.pipeline.details.enabled: true
+monitoring.cluster_uuid: "iQ5l-feLScKfWHHMmZ2Emg"
 #
 # X-Pack Management
 # https://www.elastic.co/guide/en/logstash/current/logstash-centralized-pipeline-management.html
 xpack.management.enabled: false
 xpack.management.pipeline.id: ["main", "dlq"]
-#xpack.management.elasticsearch.username: logstash_admin_user
-#xpack.management.elasticsearch.password: password
-#xpack.management.elasticsearch.proxy: ["http://proxy:port"]
-#xpack.management.elasticsearch.hosts: ["https://es1:9200", "https://es2:9200"]
-# an alternative to hosts + username/password settings is to use cloud_id/cloud_auth
-#xpack.management.elasticsearch.cloud_id: management_cluster_id:xxxxxxxxxx
-#xpack.management.elasticsearch.cloud_auth: logstash_admin_user:password
-# another authentication alternative is to use an Elasticsearch API key
-#xpack.management.elasticsearch.api_key: "id:api_key"
-#xpack.management.elasticsearch.ssl.ca_trusted_fingerprint: xxxxxxxxxx
-#xpack.management.elasticsearch.ssl.certificate_authority: "/path/to/ca.crt"
-#xpack.management.elasticsearch.ssl.truststore.path: /path/to/file
-#xpack.management.elasticsearch.ssl.truststore.password: password
-#xpack.management.elasticsearch.ssl.keystore.path: /path/to/file
-#xpack.management.elasticsearch.ssl.keystore.password: password
-#xpack.management.elasticsearch.ssl.verification_mode: certificate
-#xpack.management.elasticsearch.sniffing: false
-#xpack.management.logstash.poll_interval: 5s
 
 # X-Pack GeoIP plugin
 # https://www.elastic.co/guide/en/logstash/current/plugins-filters-geoip.html#plugins-filters-geoip-manage_update
@@ -373,4 +337,3 @@ xpack.management.pipeline.id: ["main", "dlq"]
 ## https://github.com/elastic/logstash/blob/master/docker/data/logstash/config/logstash-full.yml
 #
 http.host: "0.0.0.0"
-xpack.monitoring.elasticsearch.hosts: [ "http://elasticsearch:9200" ]

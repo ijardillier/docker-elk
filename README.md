@@ -1,6 +1,6 @@
 # Elastic stack (ELK) on Docker
 
-Run the latest version of the [Elastic stack][elk-stack], Prometheus with Docker and Docker Compose.
+Run the latest version of the [Elastic stack][elk-stack], [Prometheus][prometheus] with Docker and Docker Compose.
 
 It gives you the ability to analyze any data set by using the searching/aggregation capabilities of Elasticsearch and
 the visualization power of Kibana.
@@ -25,13 +25,12 @@ Based on the official Docker images from Elastic:
     - [Host setup](#host-setup)
       - [Linux](#linux)
       - [Windows](#windows)
-    - [SELinux](#selinux)
   - [Usage](#usage)
     - [Bringing up the stack](#bringing-up-the-stack)
     - [Cleanup](#cleanup)
   - [Initial setup](#initial-setup)
     - [Setting up user authentication](#setting-up-user-authentication)
-    - [Loadgin ingest pipelines](#loadgin-ingest-pipelines)
+    - [Loading ingest pipelines](#loading-ingest-pipelines)
     - [Injecting data](#injecting-data)
     - [Injecting logs and metrics from our stack](#injecting-logs-and-metrics-from-our-stack)
     - [Default Kibana index pattern creation](#default-kibana-index-pattern-creation)
@@ -61,39 +60,24 @@ Based on the official Docker images from Elastic:
 
 #### Linux
 
-* [Docker Engine](https://docs.docker.com/install/)
-* [Docker Compose](https://docs.docker.com/compose/install/)
-* 2 GB of RAM
+* [Docker Engine](https://docs.docker.com/engine/install/)
+* [Docker Compose](https://docs.docker.com/compose/)
 
 #### Windows
 
-* [Docker Desktop](https://docs.docker.com/docker-for-windows/install/)
-* 2 GB of RAM
-* [Use the WSL 2 based engine](https://docs.docker.com/docker-for-windows/wsl/)
+* [Docker Desktop](https://docs.docker.com/desktop/install/windows-install/)
+* [Use the WSL 2 based engine](https://docs.docker.com/desktop/windows/wsl/)
 
 > Especially on Linux, make sure your user has the [required permissions][linux-postinstall] to
 > interact with the Docker daemon.
 
 By default, the stack exposes the following ports:
-* 5000: Logstash TCP input
-* 9200: Elasticsearch HTTP
-* 9300: Elasticsearch TCP transport
+* 5044: Logstash TCP input
+* 9200: Elasticsearch HTTP (first node only)
 * 5601: Kibana
 * 9090: Prometheus
 
-> Elasticsearch's [bootstrap checks][booststap-checks] were purposely disabled to facilitate the setup of the
-> Elastic stack in development environments. For production setups, we recommend users to set up their host according to
-> the instructions from the Elasticsearch documentation: [Important System Configuration][es-sys-config].
-
-### SELinux
-
-On distributions which have SELinux enabled out-of-the-box you will need to either re-context the files or set SELinux
-into Permissive mode in order for docker-elk to start properly. For example on Redhat and CentOS, the following will
-apply the proper context:
-
-```console
-$ chcon -R system_u:object_r:admin_home_t:s0 docker-elk/
-```
+> This docker compose is based on the official one provided by Elastic and available on Elasticsearch Guide [Install Elasticsearch with Docker][elasticsearch-docker] for development purpose. For production setups, we recommend users to set up their host according to the instructions from the Elasticsearch documentation: [Important System Configuration][es-sys-config].
 
 ## Usage
 
@@ -107,11 +91,11 @@ $ docker-compose up
 
 You can also run all services in the background (detached mode) by adding the `-d` flag to the above command.
 
-If you are starting the stack for the very first time, please read the section below attentively.
+If you are starting the stack for the very **first time**, please read the section below attentively.
 
 ### Cleanup
 
-Elasticsearch and prometheus data are persisted inside volumes by default.
+Elasticsearch, Kibana, Logstash and Prometheus data are persisted inside volumes by default.
 
 In order to entirely shutdown the stack and remove all persisted data, use the following Docker Compose command:
 
@@ -130,25 +114,22 @@ The stack is pre-configured with the following **privileged** bootstrap user:
 * user: *elastic*
 * password: *changeme*
 
-Since v8 of Elastic stack, components won't work with this user, you have to configure the unprivileged [built-in users][builtin-users] after start of elasticsearch node. 
+This is done by setting the ELASTIC_PASSWORD in the environment variables on each node (esxx).
+
+Since v8 of Elastic stack, components won't work with this user, so we have to configure the unprivileged [built-in users][builtin-users].
 
 1. Initialize passwords for built-in users
 
-```console
-$ docker container exec -it elasticsearch_1 /bin/bash
-elasticsearch@...:~$ bin/elasticsearch-setup-passwords interactive
-```
+The stack automatically configure the following builtin-users:
 
-Passwords for all 6 built-in users will be randomly generated. Take note of them.
+* user: *kibana_system*
+* password: *changeme*
 
-2. Unset the bootstrap password (_optional_)
+In this docker compose, we use a temporary elasticsearch container to setup built-in users passwords (es00).
 
-Remove the `ELASTIC_PASSWORD` environment variable from the `elasticsearch` service inside the Compose file
-(`docker-compose.yml`). It is only used to initialize the keystore during the initial startup of Elasticsearch.
+The passwords are defined in the .env file. **Don't forget to change them before you run the docker compose for the first time**.
 
-3. Replace usernames and passwords in configuration files
-
-Update the `kibana_system` password inside the Kibana configuration file (`kibana/config/kibana.yml`).
+2. Replace usernames and passwords in configuration files
 
 Update the `logstash_system` password inside the Logstash configuration file (`logstash/config/logstash.yml`).
 
@@ -162,6 +143,11 @@ Replace the password for the `elastic` user inside the Logstash pipeline file (`
 
 See also the [Configuration](#configuration) section below.
 
+3. Unset the bootstrap password (_optional_)
+
+Remove the `ELASTIC_PASSWORD` environment variable from the `elasticsearch` service inside the Compose file
+(`docker-compose.yml`). It is only used to initialize the keystore during the initial startup of Elasticsearch.
+
 4. Restart Kibana, Logstash, Filebeat and Metricbeat to apply changes
 
 ```console
@@ -170,7 +156,7 @@ $ docker-compose restart kibana logstash filebeat metricbeat
 
 > Learn more about the security of the Elastic stack at [Tutorial: Getting started with security][sec-tutorial].
 
-### Loadgin ingest pipelines
+### Loading ingest pipelines
 
 ```console
 $ docker container exec -it filebeat /bin/bash
@@ -381,13 +367,14 @@ See the following Wiki pages:
 * [Popular integrations](https://github.com/deviantony/docker-elk/wiki/Popular-integrations)
 
 [elk-stack]: https://www.elastic.co/elk-stack
-[stack-features]: https://www.elastic.co/products/stack
+[prometheus]: https://prometheus.io
+[stack-features]: https://www.elastic.co/elastic-stack/features
 [paid-features]: https://www.elastic.co/subscriptions
 [trial-license]: https://www.elastic.co/guide/en/elasticsearch/reference/current/license-settings.html
 
 [linux-postinstall]: https://docs.docker.com/install/linux/linux-postinstall/
 
-[booststap-checks]: https://www.elastic.co/guide/en/elasticsearch/reference/current/bootstrap-checks.html
+[elasticsearch-docker]: https://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html
 [es-sys-config]: https://www.elastic.co/guide/en/elasticsearch/reference/current/system-config.html
 
 [win-shareddrives]: https://docs.docker.com/docker-for-windows/#shared-drives
@@ -414,3 +401,30 @@ See the following Wiki pages:
 [esuser]: https://github.com/elastic/elasticsearch/blob/7.6/distribution/docker/src/docker/Dockerfile#L23-L24
 
 [upgrade]: https://www.elastic.co/guide/en/elasticsearch/reference/current/setup-upgrade.html
+
+
+
+
+
+
+"FLEET_SERVER_ENABLE=1",
+                "FLEET_ENROLL=1",
+                "FLEET_URL=https://fleet-server:8220",
+                "FLEET_CA=/usr/share/elastic-agent/certificates/ca/ca.crt",
+                "FLEET_SERVER_ELASTICSEARCH_PASSWORD=JcRZwmwBPduguAuv",
+                "FLEET_SERVER_ELASTICSEARCH_HOST=https://elasticsearch:9200",
+                "FLEET_SERVER_ELASTICSEARCH_CA=/usr/share/elastic-agent/certificates/ca/ca.crt",
+                "FLEET_SERVER_CERT=/usr/share/elastic-agent/certificates/fleet-server/fleet-server.crt",
+                "FLEET_SERVER_CERT_KEY=/usr/share/elastic-agent/certificates/fleet-server/fleet-server.key",
+                "CERTIFICATE_AUTHORITIES=/usr/share/elastic-agent/certificates/ca/ca.crt",
+                "KIBANA_FLEET_SETUP=1",
+                "KIBANA_HOST=http://kibana:5601",
+                "KIBANA_PASSWORD=JcRZwmwBPduguAuv",
+                "ELASTICSEARCH_PASSWORD=JcRZwmwBPduguAuv",
+                "ELATICSEARCH_CA=/usr/share/elastic-agent/certificates/ca/ca.crt",
+                "FLEET_SERVER_POLICY_ID=default-policy",
+                "PATH=/usr/share/elastic-agent:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+                "BEAT_SETUID_AS=elastic-agent",
+                "ELASTIC_CONTAINER=true",
+                "GODEBUG=madvdontneed=1",
+                "LIBBEAT_MONITORING_CGROUPS_HIERARCHY_OVERRIDE=/"

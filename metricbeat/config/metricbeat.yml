@@ -28,75 +28,6 @@ metricbeat.autodiscover:
     - type: docker
       hints.enabled: true
 
-#==========================  Modules configuration =============================
-
-metricbeat.modules:
-
-- module: docker
-  metricsets:
-    - "container"
-    - "cpu"
-    - "diskio"
-    - "healthcheck"
-    - "info"
-    - "memory"
-    - "network"
-  hosts: ["unix:///var/run/docker.sock"]
-  period: 10s
-  enabled: true
-
-- module: prometheus
-  period: 30s
-  metricsets: ["collector"]
-  hosts: ["prometheus:9090"]
-  metrics_path: /metrics
-  use_types: true
-  rate_counters: false
-
-# - module: prometheus
-#   period: 10s
-#   metricsets: ["query"]
-#   hosts: ["prometheus:9090"]
-#   queries:
-#   - name: 'myapp_metrics'
-#     path: '/api/v1/query'
-#     params:
-#       query: "{__name__=~'myapp.*'}"
-
-# - module: prometheus
-#   period: 10s
-#   metricsets: ["collector"]
-#   hosts: ["host.docker.internal:9091"]
-#   metrics_path: /metrics
-#   metrics_filters:
-#     include: ["myapp*"]
-#   use_types: true
-#   rate_counters: false
-
-# - module: prometheus
-#   period: 10s
-#   metricsets: ["collector"]
-#   hosts: ["api-testapm:5101"]
-#   metrics_path: /metrics
-#   use_types: true
-#   rate_counters: false
-
-# - module: prometheus
-#   period: 10s
-#   metricsets: ["collector"]
-#   hosts: ["host.docker.internal:8081"]
-#   metrics_path: /metrics
-#   use_types: true
-#   rate_counters: false
-
-# - module: prometheus
-#   period: 10s
-#   metricsets: ["collector"]
-#   hosts: ["host.docker.internal:8084"]
-#   metrics_path: /metrics
-#   use_types: true
-#   rate_counters: false
-
 # ================================== General ===================================
 
 # The name of the shipper that publishes the network data. It can be used to group
@@ -106,7 +37,7 @@ name: metricbeat
 tags: [ "docker-elk" ]
 fields:
   env: "dev"
-fields_under_root: true
+#fields_under_root: true
 
 # ================================= Processors =================================
 # Processors are used to reduce the number of fields in the exported event or to
@@ -114,7 +45,7 @@ fields_under_root: true
 
 processors:
   - add_host_metadata: ~
-  - add_docker_metadata: ~
+#  - add_docker_metadata: ~
 
 # ================================== Outputs ===================================
 # Configure what output to use when sending the data collected by the beat.
@@ -122,9 +53,12 @@ processors:
 # ---------------------------- Elasticsearch Output ----------------------------
 
 output.elasticsearch:
-  hosts: ["http://elasticsearch:9200"]
+  hosts: ["https://es01:9200","https://es02:9200","https://es03:9200"]
   username: elastic
   password: changeme
+  ssl.certificate_authorities: ["/usr/share/metricbeat/certs/ca/ca.crt"]
+  loadbalance: true
+  worker: 2
 
 # ------------------------------ Logstash Output -------------------------------
 
@@ -158,6 +92,7 @@ setup.template:
     index:
       number_of_shards: 1
       number_of_replicas: 0
+      mapping.total_fields.limit: 15000
 
 # ====================== Index Lifecycle Management (ILM) ======================
 # Configure index lifecycle management (ILM) to manage the backing indices
@@ -208,3 +143,5 @@ monitoring.enabled: false
 http.enabled: true
 http.host: 0.0.0.0
 http.port: 5066
+
+system.hostfs: /hostfs

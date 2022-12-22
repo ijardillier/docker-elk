@@ -1,0 +1,10 @@
+# Module: elasticsearch
+# Docs: https://www.elastic.co/guide/en/beats/metricbeat/8.3/metricbeat-module-elasticsearch.html
+
+- module: elasticsearch
+  xpack.enabled: true
+  period: 10s
+  hosts: ["https://es01:9200","https://es02:9200","https://es03:9200"]
+  username: "elastic"
+  password: "changeme"
+  ssl.certificate_authorities: "/usr/share/metricbeat/certs/ca/ca.crt"

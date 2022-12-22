@@ -19,17 +19,49 @@ filebeat.autodiscover:
   providers:
     - type: docker
       hints.enabled: true
+      hints.default_config:
+        type: container
+        paths:
+          - /var/lib/docker/containers/${data.container.id}/*.log
+        processors:
+          - decode_json_fields:
+              fields: ["message"]
+              process_array: false
+              max_depth: 1
+              target: ""
+              overwrite_keys: true
+              add_error_key: true
       templates:
         - condition:
             contains:
               docker.container.image: elasticsearch
           config:
             - module: elasticsearch
-              log:
+              server:
                 input:
                   type: container
                   paths:
-                    - /var/lib/docker/containers/${data.docker.container.id}/*.log
+                    - /var/lib/docker/containers/${data.container.id}/*.log
+              gc:
+                input:
+                  type: container
+                  paths:
+                    - /var/lib/docker/containers/${data.container.id}/*.log
+              audit:
+                input:
+                  type: container
+                  paths:
+                    - /var/lib/docker/containers/${data.container.id}/*.log
+              slowlog:
+                input:
+                  type: container
+                  paths:
+                    - /var/lib/docker/containers/${data.container.id}/*.log
+              deprecation:
+                input:
+                  type: container
+                  paths:
+                    - /var/lib/docker/containers/${data.container.id}/*.log
         - condition:
             contains:
               docker.container.image: kibana
@@ -39,7 +71,12 @@ filebeat.autodiscover:
                 input:
                   type: container
                   paths:
-                    - /var/lib/docker/containers/${data.docker.container.id}/*.log
+                    - /var/lib/docker/containers/${data.container.id}/*.log
+              audit:
+                input:
+                  type: container
+                  paths:
+                    - /var/lib/docker/containers/${data.container.id}/*.log
         - condition:
             contains:
               docker.container.image: logstash
@@ -49,12 +86,17 @@ filebeat.autodiscover:
                 input:
                   type: container
                   paths:
-                    - /var/lib/docker/containers/${data.docker.container.id}/*.log
-      appenders:
-      - type: config
-        config:
-          ignore_older: 72h
-          close_inactive: 1h
+                    - /var/lib/docker/containers/${data.container.id}/*.log
+              slowlog:
+                input:
+                  type: container
+                  paths:
+                    - /var/lib/docker/containers/${data.container.id}/*.log
+      # appenders:
+      # - type: config
+      #   config:
+      #     - ignore_older: 72h
+      #     - close_inactive: 1h
 
 # ========================== Filebeat global options ===========================
 
@@ -70,7 +112,7 @@ name: filebeat
 tags: [ "docker-elk" ]
 fields:
   env: "dev"
-fields_under_root: true
+#fields_under_root: true
 
 # ================================= Processors =================================
 # Processors are used to reduce the number of fields in the exported event or to
@@ -78,15 +120,9 @@ fields_under_root: true
 
 processors:
 - add_host_metadata: ~
-- add_docker_metadata: ~
+#- add_docker_metadata: ~
 - add_locale:
     format: offset
-- decode_json_fields:
-    fields: ["message"]
-    process_array: false
-    max_depth: 1
-    target: ""
-    overwrite_keys: true
 
 # ================================== Outputs ===================================
 # Configure what output to use when sending the data collected by the beat.
@@ -94,9 +130,12 @@ processors:
 # ---------------------------- Elasticsearch Output ----------------------------
 
 output.elasticsearch:
-  hosts: ["http://elasticsearch:9200"]
+  hosts: ["https://es01:9200","https://es02:9200","https://es03:9200"]
   username: elastic
   password: changeme
+  ssl.certificate_authorities: ["/usr/share/filebeat/certs/ca/ca.crt"]
+  loadbalance: true
+  worker: 2
 
 # ------------------------------ Logstash Output -------------------------------
 

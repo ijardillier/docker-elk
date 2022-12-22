@@ -1,0 +1,9 @@
+# Module: beat
+# Docs: https://www.elastic.co/guide/en/beats/metricbeat/8.3/metricbeat-module-beat.html
+
+- module: beat
+  xpack.enabled: true
+  period: 10s
+  hosts: ["http://filebeat:5066","http://metricbeat:5066"]
+  username: "elastic"
+  password: "changeme"
