@@ -17,6 +17,7 @@
     #- socket
     # - service
     #- users
+  process.cgroups.enabled: false
   process.include_top_n:
     by_cpu: 5      # include top 5 processes by CPU
     by_memory: 5   # include top 5 processes by memory
