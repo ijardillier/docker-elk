@@ -327,30 +327,3 @@ $ docker-compose up
 [esuser]: https://github.com/elastic/elasticsearch/blob/7.6/distribution/docker/src/docker/Dockerfile#L23-L24
 
 [upgrade]: https://www.elastic.co/guide/en/elasticsearch/reference/current/setup-upgrade.html
-
-
-
-
-
-
-"FLEET_SERVER_ENABLE=1",
-                "FLEET_ENROLL=1",
-                "FLEET_URL=https://fleet-server:8220",
-                "FLEET_CA=/usr/share/elastic-agent/certificates/ca/ca.crt",
-                "FLEET_SERVER_ELASTICSEARCH_PASSWORD=JcRZwmwBPduguAuv",
-                "FLEET_SERVER_ELASTICSEARCH_HOST=https://elasticsearch:9200",
-                "FLEET_SERVER_ELASTICSEARCH_CA=/usr/share/elastic-agent/certificates/ca/ca.crt",
-                "FLEET_SERVER_CERT=/usr/share/elastic-agent/certificates/fleet-server/fleet-server.crt",
-                "FLEET_SERVER_CERT_KEY=/usr/share/elastic-agent/certificates/fleet-server/fleet-server.key",
-                "CERTIFICATE_AUTHORITIES=/usr/share/elastic-agent/certificates/ca/ca.crt",
-                "KIBANA_FLEET_SETUP=1",
-                "KIBANA_HOST=http://kibana:5601",
-                "KIBANA_PASSWORD=JcRZwmwBPduguAuv",
-                "ELASTICSEARCH_PASSWORD=JcRZwmwBPduguAuv",
-                "ELATICSEARCH_CA=/usr/share/elastic-agent/certificates/ca/ca.crt",
-                "FLEET_SERVER_POLICY_ID=default-policy",
-                "PATH=/usr/share/elastic-agent:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
-                "BEAT_SETUID_AS=elastic-agent",
-                "ELASTIC_CONTAINER=true",
-                "GODEBUG=madvdontneed=1",
-                "LIBBEAT_MONITORING_CGROUPS_HIERARCHY_OVERRIDE=/"

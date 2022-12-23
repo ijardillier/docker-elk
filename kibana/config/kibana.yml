@@ -9,6 +9,33 @@ xpack.encryptedSavedObjects.encryptionKey: dc3bfa3b97a605d4b07a4fbddfd63029
 xpack.reporting.encryptionKey: 3072aa993391749a7cfd4db97f9df7ca
 xpack.security.encryptionKey: cccb93bfad885f795824230543c6bd6c
 
+#xpack.fleet.agents.elasticsearch.hosts: ["https://es01:9200","https://es02:9200","https://es03:9200"]
+
+xpack.fleet.packages:
+  - name: fleet_server
+    version: latest
+  - name: system
+    version: latest
+
+xpack.fleet.agentPolicies:
+  - name: Fleet Server Policy
+    id: fleet-server-policy
+    description: Fleet Server policy owned by Kibana
+    namespace: default
+    monitoring_enabled: ['logs', 'metrics']
+    is_managed: false
+    is_default: true
+    is_default_fleet_server: true
+    package_policies: 
+      - name: fleet_server-1
+        id: fleet_server-1
+        package:
+          name: fleet_server  
+      - name: system-1
+        id: system-1
+        package:
+          name: system    
+      
 monitoring.ui.container.elasticsearch.enabled: true
 monitoring.ui.container.logstash.enabled: true
 
