@@ -30,12 +30,9 @@ Based on the official Docker images from Elastic:
     - [Cleanup](#cleanup)
   - [Initial setup](#initial-setup)
     - [Setting up user authentication](#setting-up-user-authentication)
-    - [Loading ingest pipelines](#loading-ingest-pipelines)
     - [Injecting data](#injecting-data)
     - [Injecting logs and metrics from our stack](#injecting-logs-and-metrics-from-our-stack)
-    - [Default Kibana index pattern creation](#default-kibana-index-pattern-creation)
-      - [Via the Kibana web UI](#via-the-kibana-web-ui)
-      - [On the command line](#on-the-command-line)
+    - [Default Kibana data view creation](#default-kibana-data-view-creation)
   - [Configuration](#configuration)
     - [How to configure Elasticsearch](#how-to-configure-elasticsearch)
     - [How to configure Kibana](#how-to-configure-kibana)
@@ -44,15 +41,10 @@ Based on the official Docker images from Elastic:
     - [How to configure Metricbeat](#how-to-configure-metricbeat)
     - [How to disable paid features](#how-to-disable-paid-features)
     - [How to scale out the Elasticsearch cluster](#how-to-scale-out-the-elasticsearch-cluster)
-  - [Extensibility](#extensibility)
-    - [How to add plugins](#how-to-add-plugins)
-    - [How to enable the provided extensions](#how-to-enable-the-provided-extensions)
   - [JVM tuning](#jvm-tuning)
     - [How to specify the amount of memory used by a service](#how-to-specify-the-amount-of-memory-used-by-a-service)
-    - [How to enable a remote JMX connection to a service](#how-to-enable-a-remote-jmx-connection-to-a-service)
   - [Going further](#going-further)
     - [Using a newer stack version](#using-a-newer-stack-version)
-    - [Plugins and integrations](#plugins-and-integrations)
 
 ## Requirements
 
@@ -72,7 +64,8 @@ Based on the official Docker images from Elastic:
 > interact with the Docker daemon.
 
 By default, the stack exposes the following ports:
-* 5044: Logstash TCP input
+* 5000: Logstash TCP input
+* 5044: Logstash Beats input
 * 9200: Elasticsearch HTTP (first node only)
 * 5601: Kibana
 * 9090: Prometheus
@@ -125,17 +118,26 @@ The stack automatically configure the following builtin-users:
 * user: *kibana_system*
 * password: *changeme*
 
+* user: *logstash_system*
+* password: *changeme*
+
+* user: *beats_system*
+* password: *changeme*
+
+* user: *remote_monitoring_user*
+* password: *changeme*
+
 In this docker compose, we use a temporary elasticsearch container to setup built-in users passwords (es00).
 
 The passwords are defined in the .env file. **Don't forget to change them before you run the docker compose for the first time**.
 
-2. Replace usernames and passwords in configuration files
+1. Replace usernames and passwords in configuration files
 
-Update the `logstash_system` password inside the Logstash configuration file (`logstash/config/logstash.yml`).
+The `logstash_system` and `beats_system` users are not used at this time.
 
-Update the `beats_system` password inside the Beats (Filebeat and Metricbeat) configuration files (`filebeat/config/filebeat.yml` and `metricbeat/config/metricbeat.yml`). Update `kibana_system` password for Kibana setup.
+Normally, you should use the `remote_monitoring_user` password in Metricbeat xpack modules configuration files (`metricbeat/config/modules.d/*-xpack.yml`) but this is no more working at this time.
 
-Replace the password for the `elastic` user inside the Logstash pipeline file (`logstash/pipeline/logstash.conf`).
+Replace the password for the `elastic` user for each occurence of "changeme" password.
 
 > Do not use the `logstash_system` user inside the Logstash *pipeline* file, it does not have
 > sufficient permissions to create indices. Follow the instructions at [Configuring Security in Logstash][ls-security]
@@ -143,7 +145,7 @@ Replace the password for the `elastic` user inside the Logstash pipeline file (`
 
 See also the [Configuration](#configuration) section below.
 
-3. Unset the bootstrap password (_optional_)
+1. Unset the bootstrap password (_optional_)
 
 Remove the `ELASTIC_PASSWORD` environment variable from the `elasticsearch` service inside the Compose file
 (`docker-compose.yml`). It is only used to initialize the keystore during the initial startup of Elasticsearch.
@@ -154,14 +156,7 @@ Remove the `ELASTIC_PASSWORD` environment variable from the `elasticsearch` serv
 $ docker-compose restart kibana logstash filebeat metricbeat
 ```
 
-> Learn more about the security of the Elastic stack at [Tutorial: Getting started with security][sec-tutorial].
-
-### Loading ingest pipelines
-
-```console
-$ docker container exec -it filebeat /bin/bash
-filebeat@...:~$ filebeat setup --pipelines --modules system,elasticsearch,kibana,logstash
-```
+> Learn more about the security of the Elastic stack at [Tutorial: Getting started with security][secure-cluster].
 
 ### Injecting data
 
@@ -189,39 +184,19 @@ You can also load the sample data provided by your Kibana installation.
 
 ### Injecting logs and metrics from our stack
 
-Filebeat and Metricbeat are configured to automatically send logs and metrics from our stack to elasticsearch.
+Filebeat and Metricbeat are configured to automatically send logs and metrics from our stack to elasticsearch. It will create filebeat-{version} and metricbeat-{version} datastreams.
 
-### Default Kibana index pattern creation
+Logstash is configured for Beats input on 5044 port and TCP input on 5000.
 
-When Kibana launches for the first time, it is not configured with any index pattern.
+Stack Monitoring is available thanks to Metricbeat xpack modules.
 
-> You need to iconfigure filebeat (`filebeat-*`) and metricbeat (`metricbeat-*`) index patterns (see below) in order to discover data.
+### Default Kibana data view creation
 
-#### Via the Kibana web UI
+When Kibana launches for the first time, it is not configured with any data view.
 
-> You need to inject data into Logstash before being able to configure a Logstash index pattern via
-the Kibana web UI.
+> You need to configure filebeat (`filebeat-*`) and metricbeat (`metricbeat-*`) data view.s (see below) in order to discover data.
 
-Navigate to the _Discover_ view of Kibana from the left sidebar. You will be prompted to create an index pattern. Enter
-`logstash-*` to match Logstash indices then, on the next page, select `@timestamp` as the time filter field. Finally,
-click _Create index pattern_ and return to the _Discover_ view to inspect your log entries.
-
-Refer to [Connect Kibana with Elasticsearch][connect-kibana] and [Creating an index pattern][index-pattern] for detailed
-instructions about the index pattern configuration.
-
-#### On the command line
-
-Create an index pattern via the Kibana API:
-
-```console
-$ curl -XPOST -D- 'http://localhost:5601/api/saved_objects/index-pattern' \
-    -H 'Content-Type: application/json' \
-    -H 'kbn-version: 7.5.1' \
-    -u elastic:<your generated elastic password> \
-    -d '{"attributes":{"title":"logstash-*","timeFieldName":"@timestamp"}}'
-```
-
-The created pattern will automatically be marked as the default index pattern as soon as the Kibana UI is opened for the first time.
+> You need to inject data into Logstash before being able to configure a Logstash data view via the Kibana web UI.
 
 ## Configuration
 
@@ -255,7 +230,7 @@ containers: [Running Kibana on Docker][kbn-docker].
 
 ### How to configure Logstash
 
-The Logstash configuration is stored in [`logstash/config/logstash.yml`][config-ls].
+The Logstash configuration is stored in [`logstash/config/logstash.yml`][config-ls] and pipelines configuration is done in [`logstash/config/pipelines.yml`][config-pl].
 
 It is also possible to map the entire `config` directory instead of a single file, however you must be aware that
 Logstash will be expecting a [`log4j2.properties`][log4j-props] file for its own logging.
@@ -267,13 +242,13 @@ containers: [Configuring Logstash for Docker][ls-docker].
 
 The Filebeat configuration is stored in [`filebeat/config/filebeat.yml`][config-fb].
 
-It is also possible to map the entire `config` directory instead of a single file, in order to map `modules.d` subirectory too.
+Modules are configured in `modules.d` subdirectory. This folder is configured with automatic reload.
 
 ### How to configure Metricbeat
 
 The Metricbeat configuration is stored in [`metricbeat/config/metricbeat.yml`][config-mb].
 
-It is also possible to map the entire `config` directory instead of a single file, in order to map `modules.d` subirectory too.
+Modules are configured in `modules.d` subdirectory. This folder is configured with automatic reload.
 
 ### How to disable paid features
 
@@ -284,31 +259,11 @@ settings][trial-license]).
 
 Follow the instructions from the Wiki: [Scaling out Elasticsearch](https://github.com/deviantony/docker-elk/wiki/Elasticsearch-cluster)
 
-## Extensibility
-
-### How to add plugins
-
-To add plugins to any ELK component you have to:
-
-1. Add a `RUN` statement to the corresponding `Dockerfile` (eg. `RUN logstash-plugin install logstash-filter-json`)
-2. Add the associated plugin code configuration to the service configuration (eg. Logstash input/output)
-3. Rebuild the images using the `docker-compose build` command
-
-### How to enable the provided extensions
-
-A few extensions are available inside the [`extensions`](extensions) directory. These extensions provide features which
-are not part of the standard Elastic stack, but can be used to enrich it with extra integrations.
-
-The documentation for these extensions is provided inside each individual subdirectory, on a per-extension basis. Some
-of them require manual changes to the default ELK configuration.
-
 ## JVM tuning
 
 ### How to specify the amount of memory used by a service
 
-By default, both Elasticsearch and Logstash start with [1/4 of the total host
-memory](https://docs.oracle.com/javase/8/docs/technotes/guides/vm/gctuning/parallel.html#default_heap_size) allocated to
-the JVM Heap Size.
+By default, Elasticsearch, Kibana and Logstash are limited to 1Gb of memory. You can change this value with the MEM_LIMIT variable in the .env file.
 
 The startup scripts for Elasticsearch and Logstash can append extra JVM options from the value of an environment
 variable, allowing the user to adjust the amount of memory that can be used by each component:
@@ -318,32 +273,10 @@ variable, allowing the user to adjust the amount of memory that can be used by e
 | Elasticsearch | ES_JAVA_OPTS         |
 | Logstash      | LS_JAVA_OPTS         |
 
-If you want to override the default JVM configuration, edit the matching environment variable(s) in the `docker-compose.yml` file.
+For each Elasticsearch node, JVM will automatically be limited to 50% of allocated memory, that's to say 512Mb.
 
-For example, to increase the maximum JVM Heap Size for Logstash:
-
-```yml
-logstash:
-
-  environment:
-    LS_JAVA_OPTS: -Xmx1g -Xms1g
-```
-
-### How to enable a remote JMX connection to a service
-
-As for the Java Heap memory (see above), you can specify JVM options to enable JMX and map the JMX port on the Docker
-host.
-
-Update the `{ES,LS}_JAVA_OPTS` environment variable with the following content (I've mapped the JMX service on the port
-18080, you can change that). Do not forget to update the `-Djava.rmi.server.hostname` option with the IP address of your
-Docker host (replace **DOCKER_HOST_IP**):
-
-```yml
-logstash:
-
-  environment:
-    LS_JAVA_OPTS: -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.port=18080 -Dcom.sun.management.jmxremote.rmi.port=18080 -Djava.rmi.server.hostname=DOCKER_HOST_IP -Dcom.sun.management.jmxremote.local.only=false
-```
+For Logstash, we need to limit the JVM to 50% of the allocated memory. 
+This is done by setting the LS_JAVA_OPTS in the .env file.
 
 ## Going further
 
@@ -353,18 +286,10 @@ To use a different Elastic Stack version than the one currently available in the
 number inside the `.env` file, and rebuild the stack with:
 
 ```console
-$ docker-compose build
 $ docker-compose up
 ```
 
 > Always pay attention to the [upgrade instructions][upgrade] for each individual component before performing a stack upgrade.
-
-### Plugins and integrations
-
-See the following Wiki pages:
-
-* [External applications](https://github.com/deviantony/docker-elk/wiki/External-applications)
-* [Popular integrations](https://github.com/deviantony/docker-elk/wiki/Popular-integrations)
 
 [elk-stack]: https://www.elastic.co/elk-stack
 [prometheus]: https://prometheus.io
@@ -382,7 +307,7 @@ See the following Wiki pages:
 
 [builtin-users]: https://www.elastic.co/guide/en/elasticsearch/reference/current/built-in-users.html
 [ls-security]: https://www.elastic.co/guide/en/logstash/current/ls-security.html
-[sec-tutorial]: https://www.elastic.co/guide/en/elasticsearch/reference/current/security-getting-started.html
+[secure-cluster]: https://www.elastic.co/guide/en/elasticsearch/reference/current/secure-cluster.html
 
 [connect-kibana]: https://www.elastic.co/guide/en/kibana/current/connect-to-elasticsearch.html
 [index-pattern]: https://www.elastic.co/guide/en/kibana/current/index-patterns.html
@@ -390,6 +315,7 @@ See the following Wiki pages:
 [config-es]: ./elasticsearch/config/elasticsearch.yml
 [config-kbn]: ./kibana/config/kibana.yml
 [config-ls]: ./logstash/config/logstash.yml
+[config-pl]: ./logstash/config/pipelines.yml
 [config-mb]: ./metricbeat/config/metricbeat.yml
 [config-fb]: ./filebeat/config/filebeat.yml
 

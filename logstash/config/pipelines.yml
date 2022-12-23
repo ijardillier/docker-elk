@@ -104,6 +104,8 @@
 
 - pipeline.id: main
   path.config: "pipeline/main/*.conf"
+- pipeline.id: beats
+  path.config: "pipeline/beats/*.conf"
 - pipeline.id: dlq
   pipeline.workers: 1
   dead_letter_queue.enable: false

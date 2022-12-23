@@ -288,21 +288,7 @@ dead_letter_queue.storage_policy: drop_older
 #
 #dead_letter_queue.retain.age: 1h
 
-# If using dead_letter_queue.enable: true, the directory path where the data files will be stored.
-# Default is path.data/dead_letter_queue
-#
-# path.dead_letter_queue:
-#
 # ------------ Debugging Settings --------------
-#
-# Options for log.level:
-#   * fatal
-#   * error
-#   * warn
-#   * info (default)
-#   * debug
-#   * trace
-#
 log.level: info
 # path.logs:
 #
@@ -322,13 +308,18 @@ log.level: info
 #
 # X-Pack Monitoring
 # https://www.elastic.co/guide/en/logstash/current/monitoring-logstash.html
-xpack.monitoring.enabled: false
+monitoring.enabled: false
 monitoring.cluster_uuid: "iQ5l-feLScKfWHHMmZ2Emg"
 #
 # X-Pack Management
 # https://www.elastic.co/guide/en/logstash/current/logstash-centralized-pipeline-management.html
-xpack.management.enabled: false
-xpack.management.pipeline.id: ["main", "dlq"]
+xpack.management.enabled: false # Basic is not a valid license for this feature
+xpack.management.elasticsearch.hosts: ["https://es01:9200","https://es02:9200","https://es03:9200"]
+xpack.management.elasticsearch.username: elastic
+xpack.management.elasticsearch.password: changeme
+xpack.management.elasticsearch.ssl.certificate_authority: "/usr/share/logstash/certs/ca/ca.crt"
+xpack.management.logstash.poll_interval: 10s
+xpack.management.pipeline.id: ["main", "beats", "dlq"]
 
 # X-Pack GeoIP plugin
 # https://www.elastic.co/guide/en/logstash/current/plugins-filters-geoip.html#plugins-filters-geoip-manage_update

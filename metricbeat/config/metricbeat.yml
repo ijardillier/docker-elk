@@ -92,7 +92,7 @@ setup.template:
     index:
       number_of_shards: 1
       number_of_replicas: 0
-      mapping.total_fields.limit: 10000
+      #mapping.total_fields.limit: 10000
 
 # ====================== Index Lifecycle Management (ILM) ======================
 # Configure index lifecycle management (ILM) to manage the backing indices
