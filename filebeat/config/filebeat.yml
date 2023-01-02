@@ -11,6 +11,10 @@
 # You can find the full configuration reference here:
 # https://www.elastic.co/guide/en/beats/filebeat/current/index.html
 
+# ========================= Filebeat General settings ==========================
+name: Zenika
+timestamp.precision: microsecond
+
 # =========================== Filebeat autodiscover ============================
 # Autodiscover allows you to detect changes in the system and spawn new modules
 # or inputs as they happen.

@@ -4,7 +4,7 @@
 # options. The elastic-agent.reference.yml file from the same directory contains all the
 # supported options with more comments. You can use it as a reference.
 
-host.name: Fleet Server
+name: Zenika
 
 ######################################
 # Fleet configuration

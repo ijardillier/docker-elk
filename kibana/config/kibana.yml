@@ -9,7 +9,7 @@ xpack.encryptedSavedObjects.encryptionKey: dc3bfa3b97a605d4b07a4fbddfd63029
 xpack.reporting.encryptionKey: 3072aa993391749a7cfd4db97f9df7ca
 xpack.security.encryptionKey: cccb93bfad885f795824230543c6bd6c
 
-#xpack.fleet.agents.elasticsearch.hosts: ["https://es01:9200","https://es02:9200","https://es03:9200"]
+xpack.fleet.agents.elasticsearch.hosts: ["https://es01:9200","https://es02:9200","https://es03:9200"]
 
 xpack.fleet.packages:
   - name: fleet_server
