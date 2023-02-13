@@ -11,11 +11,7 @@
 # You can find the full configuration reference here:
 # https://www.elastic.co/guide/en/beats/filebeat/current/index.html
 
-# ========================= Filebeat General settings ==========================
-name: Zenika
-timestamp.precision: microsecond
-
-# =========================== Filebeat autodiscover ============================
+# ============================= Autodiscover ===============================
 # Autodiscover allows you to detect changes in the system and spawn new modules
 # or inputs as they happen.
 
@@ -112,7 +108,8 @@ filebeat.config:
 
 # ================================== General ==================================
 
-name: filebeat
+name: Zenika
+timestamp.precision: microsecond
 tags: [ "docker-elk" ]
 fields:
   env: "dev"
@@ -126,25 +123,25 @@ processors:
 - add_host_metadata: ~
 #- add_docker_metadata: ~
 - add_locale:
-    format: offset
+    format: ~
 
 # ================================== Outputs ===================================
 # Configure what output to use when sending the data collected by the beat.
 
 # ---------------------------- Elasticsearch Output ----------------------------
 
-output.elasticsearch:
-  hosts: ["https://es01:9200","https://es02:9200","https://es03:9200"]
-  username: elastic
-  password: changeme
-  ssl.certificate_authorities: ["/usr/share/filebeat/certs/ca/ca.crt"]
-  loadbalance: true
-  worker: 2
+# output.elasticsearch:
+#   hosts: ["https://es01:9200","https://es02:9200","https://es03:9200"]
+#   username: elastic
+#   password: changeme
+#   ssl.certificate_authorities: ["/usr/share/filebeat/certs/ca/ca.crt"]
+#   loadbalance: true
+#   worker: 2
 
 # ------------------------------ Logstash Output -------------------------------
 
-# output.logstash:
-#   hosts: ["logstash:5044"]
+output.logstash:
+  hosts: ["logstash:5044"]
 
 # ================================= Dashboards =================================
 # These settings control loading the sample dashboards to the Kibana index. Loading

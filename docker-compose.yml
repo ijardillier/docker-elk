@@ -410,6 +410,40 @@ services:
     networks:
       - default
 
+  heartbeat:
+    depends_on:
+      es01:
+        condition: service_healthy
+      es02:
+        condition: service_healthy
+      es03:
+        condition: service_healthy
+    image: docker.elastic.co/beats/heartbeat:${STACK_VERSION}
+    container_name: heartbeat
+    #user: root
+    restart: on-failure
+    volumes:
+      - type: bind
+        source: ./heartbeat/config/heartbeat.yml
+        target: /usr/share/heartbeat/heartbeat.yml
+        read_only: true
+      - type: bind
+        source: ./heartbeat/config/monitors.d
+        target: /usr/share/heartbeat/monitors.d
+        read_only: true
+      - type: volume
+        source: certs
+        target: /usr/share/heartbeat/certs
+        read_only: true
+      #- "/var/run/docker.sock:/var/run/docker.sock:ro"
+      #- "/var/lib/docker/containers:/var/lib/docker/containers:ro"
+      # - "/var/log:/hostfs/var/log:ro"
+    command: heartbeat -e -strict.perms=false
+    cap_add:
+      - NET_RAW
+    networks:
+      - default
+
   logstash:
     depends_on:
       es01:

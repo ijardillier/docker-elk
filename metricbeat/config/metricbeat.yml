@@ -11,9 +11,12 @@
 # You can find the full configuration reference here:
 # https://www.elastic.co/guide/en/beats/metricbeat/current/index.html
 
-# ========================= Filebeat General settings ==========================
-name: Zenika
-timestamp.precision: microsecond
+#============================== Autodiscover ===================================
+
+metricbeat.autodiscover:
+  providers:
+    - type: docker
+      hints.enabled: true
 
 #============================  Config Reloading ===============================
 # Config reloading allows to dynamically load modules. Each file which is
@@ -25,19 +28,15 @@ metricbeat.config:
     reload.enabled: true
     reload.period: 10s
 
-#============================== Autodiscover ===================================
 
-metricbeat.autodiscover:
-  providers:
-    - type: docker
-      hints.enabled: true
 
 # ================================== General ===================================
 
 # The name of the shipper that publishes the network data. It can be used to group
 # all the transactions sent by a single shipper in the web interface.
 
-name: metricbeat
+name: Zenika
+timestamp.precision: microsecond
 tags: [ "docker-elk" ]
 fields:
   env: "dev"
@@ -51,25 +50,25 @@ processors:
   - add_host_metadata: ~
 #  - add_docker_metadata: ~
   - add_locale:
-      format: offset
+      format: ~
 
 # ================================== Outputs ===================================
 # Configure what output to use when sending the data collected by the beat.
 
 # ---------------------------- Elasticsearch Output ----------------------------
 
-output.elasticsearch:
-  hosts: ["https://es01:9200","https://es02:9200","https://es03:9200"]
-  username: elastic
-  password: changeme
-  ssl.certificate_authorities: ["/usr/share/metricbeat/certs/ca/ca.crt"]
-  loadbalance: true
-  worker: 2
+# output.elasticsearch:
+#   hosts: ["https://es01:9200","https://es02:9200","https://es03:9200"]
+#   username: elastic
+#   password: changeme
+#   ssl.certificate_authorities: ["/usr/share/metricbeat/certs/ca/ca.crt"]
+#   loadbalance: true
+#   worker: 2
 
 # ------------------------------ Logstash Output -------------------------------
 
-# output.logstash:
-#   hosts: ["logstash:5044"]
+output.logstash:
+  hosts: ["logstash:5044"]
 
 # ================================= Dashboards =================================
 # These settings control loading the sample dashboards to the Kibana index. Loading

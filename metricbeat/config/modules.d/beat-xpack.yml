@@ -4,6 +4,6 @@
 - module: beat
   xpack.enabled: true
   period: 10s
-  hosts: ["http://filebeat:5066","http://metricbeat:5066"]
-  username: "elastic"
-  password: "changeme"
+  hosts: ["http://filebeat:5066","http://metricbeat:5066","http://heartbeat:5066"]
+  #username: "elastic"
+  #password: "changeme"
