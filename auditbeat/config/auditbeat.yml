@@ -1,269 +1,177 @@
-################### Heartbeat Configuration Example #########################
+########################## Auditbeat Configuration #############################
 
-# This file is a full configuration example documenting all non-deprecated
-# options in comments. For a shorter configuration example, that contains
-# only some common options, please see heartbeat.yml in the same directory.
+# This is a reference configuration file documenting all non-deprecated options
+# in comments. For a shorter configuration example that contains only the most
+# common options, please see auditbeat.yml in the same directory.
 #
 # You can find the full configuration reference here:
-# https://www.elastic.co/guide/en/beats/heartbeat/index.html
+# https://www.elastic.co/guide/en/beats/auditbeat/index.html
 
-############################# Heartbeat ######################################
+# ============================== Config Reloading ==============================
 
+# Config reloading allows to dynamically load modules. Each file which is
+# monitored must contain one or multiple modules as a list.
+auditbeat.config.modules:
 
-# Define a directory to load monitor definitions from. Definitions take the form
-# of individual yaml files.
-heartbeat.config.monitors:
-  # Directory + glob pattern to search for configuration files
-  path: ${path.config}/monitors.d/*.yml
-  # If enabled, heartbeat will periodically check the config.monitors path for changes
-  reload.enabled: false
-  # How often to check for changes
+  # Glob pattern for configuration reloading
+  path: ${path.config}/modules.d/*.yml
+
+  # Period on which files under path should be checked for changes
   reload.period: 10s
 
-# Configure monitors
-heartbeat.monitors:
-- type: icmp # monitor type `icmp` (requires root) uses ICMP Echo Request to ping
-             # configured hosts
+  # Set to true to enable config reloading
+  reload.enabled: false
 
-  # ID used to uniquely identify this monitor in elasticsearch even if the config changes
-  id: icmp-monitor
+# Maximum amount of time to randomly delay the start of a dataset. Use 0 to
+# disable startup delay.
+auditbeat.max_start_delay: 10s
 
-  # Human readable display name for this service in Uptime UI and elsewhere
-  name: ICMP Monitor
+# =========================== Modules configuration ============================
+auditbeat.modules:
 
-  # Name of corresponding APM service, if Elastic APM is in use for the monitored service.
-  # service.name: my-apm-service-name
-
-  # Enable/Disable monitor
-  #enabled: true
-
-  # Configure task schedule using cron-like syntax
-  schedule: '*/5 * * * * * *' # exactly every 5 seconds like 10:00:00, 10:00:05, ...
-
-  # List of hosts to ping
-  hosts: ["localhost"]
-
-  # Configure IP protocol types to ping on if hostnames are configured.
-  # Ping all resolvable IPs if `mode` is `all`, or only one IP if `mode` is `any`.
-  ipv4: true
-  ipv6: true
-  mode: any
-
-  # Total running time per ping test.
-  timeout: 16s
-
-  # Waiting duration until another ICMP Echo Request is emitted.
-  wait: 1s
-
-  # The tags of the monitors are included in their own field with each
-  # transaction published. Tags make it easy to group servers by different
-  # logical properties.
-  #tags: ["service-X", "web-tier"]
-
-  # Optional fields that you can specify to add additional information to the
-  # monitor output. Fields can be scalar values, arrays, dictionaries, or any nested
-  # combination of these.
-  #fields:
-  #  env: staging
-
-  # If this option is set to true, the custom fields are stored as top-level
-  # fields in the output document instead of being grouped under a fields
-  # sub-dictionary. Default is false.
-  #fields_under_root: false
-
-# Define a directory to load monitor definitions from. Definitions take the form
-# of individual yaml files.
-# heartbeat.config.monitors:
-  # Directory + glob pattern to search for configuration files
-  #path: /path/to/my/monitors.d/*.yml
-  # If enabled, heartbeat will periodically check the config.monitors path for changes
-  #reload.enabled: true
-  # How often to check for changes
-  #reload.period: 1s
-
-- type: tcp # monitor type `tcp`. Connect via TCP and optionally verify endpoint
-            # by sending/receiving a custom payload
-  # ID used to uniquely identify this monitor in elasticsearch even if the config changes
-  id: tcp-monitor
-
-  # Human readable display name for this service in Uptime UI and elsewhere
-  name: TCP Monitor
-
-  # Enable/Disable monitor
-  #enabled: true
-
-  # Configure task schedule
-  schedule: '@every 5s' # every 5 seconds from start of beat
-
-  # configure hosts to ping.
-  # Entries can be:
-  #   - plain host name or IP like `localhost`:
-  #       Requires ports configs to be checked. If ssl is configured,
-  #       a SSL/TLS based connection will be established. Otherwise plain tcp connection
-  #       will be established
-  #   - hostname + port like `localhost:12345`:
-  #       Connect to port on given host. If ssl is configured,
-  #       a SSL/TLS based connection will be established. Otherwise plain tcp connection
-  #       will be established
-  #   - full url syntax. `scheme://<host>:[port]`. The `<scheme>` can be one of
-  #     `tcp`, `plain`, `ssl` and `tls`. If `tcp`, `plain` is configured, a plain
-  #     tcp connection will be established, even if ssl is configured.
-  #     Using `tls`/`ssl`, an SSL connection is established. If no ssl is configured,
-  #     system defaults will be used (not supported on windows).
-  #     If `port` is missing in url, the ports setting is required.
-  hosts: ["logstash:5000", "logstash:5044"]
-
-  # Configure IP protocol types to ping on if hostnames are configured.
-  # Ping all resolvable IPs if `mode` is `all`, or only one IP if `mode` is `any`.
-  ipv4: true
-  ipv6: true
-  mode: any
-
-  # List of ports to ping if host does not contain a port number
-  # ports: [80, 9200, 5044]
-
-  # Total test connection and data exchange timeout
-  #timeout: 16s
-
-  # Optional payload string to send to remote and expected answer. If none is
-  # configured, the endpoint is expected to be up if connection attempt was
-  # successful. If only `send_string` is configured, any response will be
-  # accepted as ok. If only `receive_string` is configured, no payload will be
-  # send, but client expects to receive expected payload on connect.
-  #check:
-    #send: ''
-    #receive: ''
-
-  # SOCKS5 proxy url
-  # proxy_url: ''
-
-  # Resolve hostnames locally instead on SOCKS5 server:
-  #proxy_use_local_resolver: false
-
-  # TLS/SSL connection settings:
-  #ssl:
-    # Certificate Authorities
-    #certificate_authorities: ['']
-
-    # Required TLS protocols
-    #supported_protocols: ["TLSv1.0", "TLSv1.1", "TLSv1.2"]
-
-  # The ingest pipeline ID associated with this input. If this is set, it
-  # overwrites the pipeline option from the Elasticsearch output.
-  #pipeline:
-
-  # The index name associated with this input. If this is set, it
-  # overwrites the index option from the Elasticsearch output.
-  #index:
+# The auditd module collects events from the audit framework in the Linux
+# kernel. You need to specify audit rules for the events that you want to audit.
+- module: auditd
+  resolve_ids: true
+  failure_mode: silent
+  backlog_limit: 8196
+  rate_limit: 0
+  include_raw_message: false
+  include_warnings: false
 
   # Set to true to publish fields with null values in events.
   #keep_null: false
 
-- type: http # monitor type `http`. Connect via HTTP an optionally verify response
-  # ID used to uniquely identify this monitor in elasticsearch even if the config changes
-  id: http-monitor
+  # Load audit rules from separate files. Same format as audit.rules(7).
+  audit_rule_files: [ '${path.config}/audit.rules.d/*.conf' ]
+  audit_rules: |
+    ## Define audit rules here.
+    ## Create file watches (-w) or syscall audits (-a or -A). Uncomment these
+    ## examples or add your own rules.
 
-  # Human readable display name for this service in Uptime UI and elsewhere
-  name: HTTP Monitor
+    ## If you are on a 64 bit platform, everything should be running
+    ## in 64 bit mode. This rule will detect any use of the 32 bit syscalls
+    ## because this might be a sign of someone exploiting a hole in the 32
+    ## bit API.
+    -a always,exit -F arch=b32 -S all -F key=32bit-abi
 
-  # Enable/Disable monitor
-  #enabled: true
+    ## Executions.
+    -a always,exit -F arch=b64 -S execve,execveat -k exec
 
-  # Configure task schedule
-  schedule: '@every 5s' # every 5 seconds from start of beat
+    ## External access (warning: these can be expensive to audit).
+    -a always,exit -F arch=b64 -S accept,bind,connect -F key=external-access
 
-  # Configure URLs to ping
-  urls: ["https://es01:9200", "https://es02:9200", "https://es03:9200", "http://filebeat:5066", "http://metricbeat:5066", "http://heartbeat:5066"]
+    ## Identity changes.
+    -w /etc/group -p wa -k identity
+    -w /etc/passwd -p wa -k identity
+    -w /etc/gshadow -p wa -k identity
 
-  # Configure IP protocol types to ping on if hostnames are configured.
-  # Ping all resolvable IPs if `mode` is `all`, or only one IP if `mode` is `any`.
-  ipv4: true
-  ipv6: true
-  mode: any
+    ## Unauthorized access attempts.
+    -a always,exit -F arch=b64 -S open,creat,truncate,ftruncate,openat,open_by_handle_at -F exit=-EACCES -k access
+    -a always,exit -F arch=b64 -S open,creat,truncate,ftruncate,openat,open_by_handle_at -F exit=-EPERM -k access
 
-  # Optional HTTP proxy url.
-  #proxy_url: ''
+# The file integrity module sends events when files are changed (created,
+# updated, deleted). The events contain file metadata and hashes.
+- module: file_integrity
+  paths:
+  - /bin
+  - /usr/bin
+  - /sbin
+  - /usr/sbin
+  - /etc
 
-  # Total test connection and data exchange timeout
-  #timeout: 16s
+  # List of regular expressions to filter out notifications for unwanted files.
+  # Wrap in single quotes to workaround YAML escaping rules. By default no files
+  # are ignored.
+  exclude_files:
+  - '(?i)\.sw[nop]$'
+  - '~$'
+  - '/\.git($|/)'
 
-  # Optional Authentication Credentials
-  username: 'elastic'
-  password: 'changeme'
+  # List of regular expressions used to explicitly include files. When configured,
+  # Auditbeat will ignore files unless they match a pattern.
+  #include_files:
+  #- '/\.ssh($|/)'
 
-  # TLS/SSL connection settings for use with HTTPS endpoint. If not configured
-  # system defaults will be used.
-  ssl:
-    # Certificate Authorities
-    certificate_authorities: ["/usr/share/heartbeat/certs/ca/ca.crt"]
+  # Scan over the configured file paths at startup and send events for new or
+  # modified files since the last time Auditbeat was running.
+  scan_at_start: true
 
-    # Required TLS protocols
-    #supported_protocols: ["TLSv1.0", "TLSv1.1", "TLSv1.2"]
+  # Average scan rate. This throttles the amount of CPU and I/O that Auditbeat
+  # consumes at startup while scanning. Default is "50 MiB".
+  scan_rate_per_sec: 50 MiB
 
-  # Request settings:
-  #check.request:
-    # Configure HTTP method to use. Only 'HEAD', 'GET' and 'POST' methods are allowed.
-    #method: "GET"
+  # Limit on the size of files that will be hashed. Default is "100 MiB".
+  max_file_size: 100 MiB
 
-    # Dictionary of additional HTTP headers to send:
-    #headers:
+  # Hash types to compute when the file changes. Supported types are
+  # blake2b_256, blake2b_384, blake2b_512, md5, sha1, sha224, sha256, sha384,
+  # sha512, sha512_224, sha512_256, sha3_224, sha3_256, sha3_384, sha3_512, and xxh64.
+  # Default is sha1.
+  hash_types: [sha1]
 
-    # Optional request body content
-    #body:
-
-  # Expected response settings
-  #check.response:
-    # Expected status code. If not configured or set to 0 any status code not
-    # being 404 is accepted.
-    #status: 0
-
-    # Required response headers.
-    #headers:
-
-    # Required response contents.
-    #body:
-
-    # Parses the body as JSON, then checks against the given expression
-    #json:
-    #- description: Explanation of what the check does
-    #  expression: 'myField == "expectedValue"'
-
-    # (Deprecated: see 'expression' above) Parses the body as JSON, then checks against the given condition expression
-    #json:
-    #- description: Explanation of what the check does
-    #  condition:
-    #    equals:
-    #      myField: expectedValue
-
-  # The ingest pipeline ID associated with this input. If this is set, it
-  # overwrites the pipeline option from the Elasticsearch output.
-  #pipeline:
-
-  # The index name associated with this input. If this is set, it
-  # overwrites the index option from the Elasticsearch output.
-  #index:
+  # Detect changes to files included in subdirectories. Disabled by default.
+  recursive: false
 
   # Set to true to publish fields with null values in events.
   #keep_null: false
 
-heartbeat.scheduler:
-  # Limit number of concurrent tasks executed by heartbeat. The task limit if
-  # disabled if set to 0. The default is 0.
-  #limit: 0
+  # Parse detailed information for the listed fields. Field paths in the list below
+  # that are a prefix of other field paths imply the longer field path. A set of
+  # fields may be specified using an RE2 regular expression quoted in //. For example
+  # /^file\.pe\./ will match all file.pe.* fields. Note that the expression is not
+  # implicitly anchored, so the empty expression will match all fields.
+  # file_parsers:
+  # - file.elf.sections
+  # - file.elf.sections.name
+  # - file.elf.sections.physical_size
+  # - file.elf.sections.virtual_size
+  # - file.elf.sections.entropy
+  # - file.elf.sections.var_entropy
+  # - file.elf.import_hash
+  # - file.elf.imports
+  # - file.elf.imports_names_entropy
+  # - file.elf.imports_names_var_entropy
+  # - file.elf.go_import_hash
+  # - file.elf.go_imports
+  # - file.elf.go_imports_names_entropy
+  # - file.elf.go_imports_names_var_entropy
+  # - file.elf.go_stripped
+  # - file.macho.sections
+  # - file.macho.sections.name
+  # - file.macho.sections.physical_size
+  # - file.macho.sections.virtual_size
+  # - file.macho.sections.entropy
+  # - file.macho.sections.var_entropy
+  # - file.macho.import_hash
+  # - file.macho.symhash
+  # - file.macho.imports
+  # - file.macho.imports_names_entropy
+  # - file.macho.imports_names_var_entropy
+  # - file.macho.go_import_hash
+  # - file.macho.go_imports
+  # - file.macho.go_imports_names_entropy
+  # - file.macho.go_imports_names_var_entropy
+  # - file.macho.go_stripped
+  # - file.pe.sections
+  # - file.pe.sections.name
+  # - file.pe.sections.physical_size
+  # - file.pe.sections.virtual_size
+  # - file.pe.sections.entropy
+  # - file.pe.sections.var_entropy
+  # - file.pe.import_hash
+  # - file.pe.imphash
+  # - file.pe.imports
+  # - file.pe.imports_names_entropy
+  # - file.pe.imports_names_var_entropy
+  # - file.pe.go_import_hash
+  # - file.pe.go_imports
+  # - file.pe.go_imports_names_entropy
+  # - file.pe.go_imports_names_var_entropy
+  # - file.pe.go_stripped
 
-  # Set the scheduler it's time zone
-  #location: ''
 
-heartbeat.jobs:
-  # Limit the number of concurrent monitors executed by heartbeat. This differs from
-  # heartbeat.scheduler.limit in that it maps to individual monitors rather than the
-  # subtasks of monitors. For non-browser monitors a subtask usually corresponds to a
-  # single file descriptor.
-  # This feature is most useful for the browser type
-  #browser.limit: 1
-  #http.limit: 10
-  #tcp.limit: 10
-  #icmp.limit: 10
+
 # ================================== General ===================================
 
 # The name of the shipper that publishes the network data. It can be used to group
@@ -287,7 +195,7 @@ fields:
 # sub-dictionary. Default is false.
 #fields_under_root: false
 
-# Configure the precision of all timestamps in Heartbeat.
+# Configure the precision of all timestamps in Auditbeat.
 # Available options: millisecond, microsecond, nanosecond
 timestamp.precision: microsecond
 
@@ -406,11 +314,11 @@ timestamp.precision: microsecond
 #
 # The following example enriches each event with the machine's local time zone
 # offset from UTC.
-
+#
 processors:
   - add_locale:
       format: offset
-
+#
 # The following example enriches each event with docker metadata, it matches
 # given fields to an existing container id and adds info from that container:
 #
@@ -438,9 +346,10 @@ processors:
 #  - add_docker_metadata: ~
 #
 # The following example enriches each event with host metadata.
+#
 #processors:
   - add_host_metadata: ~
-
+#
 # The following example enriches each event with process metadata using
 # process IDs included in the event.
 #
@@ -515,7 +424,7 @@ processors:
 
 # =============================== Elastic Cloud ================================
 
-# These settings simplify using Heartbeat with the Elastic Cloud (https://cloud.elastic.co/).
+# These settings simplify using Auditbeat with the Elastic Cloud (https://cloud.elastic.co/).
 
 # The cloud.id setting overwrites the `output.elasticsearch.hosts` and
 # `setup.kibana.host` options.
@@ -533,7 +442,7 @@ processors:
 # ---------------------------- Elasticsearch Output ----------------------------
 output.elasticsearch:
   # Boolean flag to enable or disable the output module.
-  enabled: false
+  enabled: true
 
   # Array of hosts to connect to.
   # Scheme and port can be left out and will be set to the default (http and 9200)
@@ -563,9 +472,9 @@ output.elasticsearch:
   # Number of workers per Elasticsearch host.
   worker: 1
 
-  # Optional data stream or index name. The default is "heartbeat-%{[agent.version]}".
+  # Optional data stream or index name. The default is "auditbeat-%{[agent.version]}".
   # In case you modify this pattern you must update setup.template.name and setup.template.pattern accordingly.
-  #index: "heartbeat-%{[agent.version]}"
+  #index: "auditbeat-%{[agent.version]}"
 
   # Optional ingest pipeline. By default no pipeline will be used.
   #pipeline: ""
@@ -608,7 +517,7 @@ output.elasticsearch:
   # Configure HTTP request timeout before failing a request to Elasticsearch.
   #timeout: 90
 
-  # heartbeat expects Elasticsearch to be the same version or newer than the Beat.
+  # auditbeat expects Elasticsearch to be the same version or newer than the Beat.
   # Lift the version restriction by setting allow_older_versions to true.
   #allow_older_versions: false
 
@@ -639,7 +548,7 @@ output.elasticsearch:
 
   # List of root certificates for HTTPS server verifications
   #ssl.certificate_authorities: ["/etc/pki/root/ca.pem"]
-  ssl.certificate_authorities: ["/usr/share/heartbeat/certs/ca/ca.crt"]
+  ssl.certificate_authorities: ["/usr/share/auditbeat/certs/ca/ca.crt"]
 
   # Certificate for SSL client authentication
   #ssl.certificate: "/etc/pki/client/cert.pem"
@@ -698,7 +607,7 @@ output.elasticsearch:
 # ------------------------------ Logstash Output -------------------------------
 output.logstash:
   # Boolean flag to enable or disable the output module.
-  enabled: true
+  enabled: false
 
   # The Logstash hosts
   hosts: ["logstash:5044"]
@@ -720,7 +629,7 @@ output.logstash:
   #ttl: 30s
 
   # Optionally load-balance events between Logstash hosts. Default is false.
-  loadbalance: true
+  loadbalance: false
 
   # Number of batches to be sent asynchronously to Logstash while processing
   # new batches.
@@ -742,9 +651,9 @@ output.logstash:
   # Logstash after a network error. The default is 60s.
   #backoff.max: 60s
 
-  # Optional index name. The default index name is set to heartbeat
+  # Optional index name. The default index name is set to auditbeat
   # in all lowercase.
-  #index: 'heartbeat'
+  #index: 'auditbeat'
 
   # SOCKS5 proxy server URL
   #proxy_url: socks5://user:password@socks5-server:2233
@@ -866,7 +775,7 @@ output.logstash:
   # Defaults to PLAIN when `username` and `password` are configured.
   #sasl.mechanism: ''
 
-  # Kafka version Heartbeat is assumed to run against. Defaults to the "1.0.0".
+  # Kafka version Auditbeat is assumed to run against. Defaults to the "1.0.0".
   #version: '1.0.0'
 
   # Configure JSON encoding
@@ -1067,8 +976,8 @@ output.logstash:
   #hosts: ["localhost:6379"]
 
   # The name of the Redis list or channel the events are published to. The
-  # default is heartbeat.
-  #key: heartbeat
+  # default is auditbeat.
+  #key: auditbeat
 
   # The password to authenticate to Redis with. The default is no authentication.
   #password:
@@ -1204,14 +1113,14 @@ output.logstash:
 
   # Path to the directory where to save the generated files. The option is
   # mandatory.
-  #path: "/tmp/heartbeat"
+  #path: "/tmp/auditbeat"
 
-  # Name of the generated files. The default is `heartbeat` and it generates
-  # files: `heartbeat-{datetime}.ndjson`, `heartbeat-{datetime}-1.ndjson`, etc.
-  #filename: heartbeat
+  # Name of the generated files. The default is `auditbeat` and it generates
+  # files: `auditbeat-{datetime}.ndjson`, `auditbeat-{datetime}-1.ndjson`, etc.
+  #filename: auditbeat
 
   # Maximum size in kilobytes of each file. When this size is reached, and on
-  # every Heartbeat restart, the files are rotated. The default value is 10240
+  # every Auditbeat restart, the files are rotated. The default value is 10240
   # kB.
   #rotate_every_kb: 10000
 
@@ -1241,26 +1150,26 @@ output.logstash:
 
 # =================================== Paths ====================================
 
-# The home path for the Heartbeat installation. This is the default base path
+# The home path for the Auditbeat installation. This is the default base path
 # for all other path settings and for miscellaneous files that come with the
 # distribution (for example, the sample dashboards).
 # If not set by a CLI flag or in the configuration file, the default for the
 # home path is the location of the binary.
 #path.home:
 
-# The configuration path for the Heartbeat installation. This is the default
+# The configuration path for the Auditbeat installation. This is the default
 # base path for configuration files, including the main YAML configuration file
 # and the Elasticsearch template file. If not set by a CLI flag or in the
 # configuration file, the default for the configuration path is the home path.
 #path.config: ${path.home}
 
-# The data path for the Heartbeat installation. This is the default base path
-# for all the files in which Heartbeat needs to store its data. If not set by a
+# The data path for the Auditbeat installation. This is the default base path
+# for all the files in which Auditbeat needs to store its data. If not set by a
 # CLI flag or in the configuration file, the default for the data path is a data
 # subdirectory inside the home path.
 #path.data: ${path.home}/data
 
-# The logs path for a Heartbeat installation. This is the default location for
+# The logs path for a Auditbeat installation. This is the default location for
 # the Beat's log files. If not set by a CLI flag or in the configuration file,
 # the default for the logs path is a logs subdirectory inside the home path.
 #path.logs: ${path.home}/logs
@@ -1275,7 +1184,7 @@ output.logstash:
 # These settings control loading the sample dashboards to the Kibana index. Loading
 # the dashboards are disabled by default and can be enabled either by setting the
 # options here, or by using the `-setup` CLI flag or the `setup` command.
-setup.dashboards.enabled: false # Dashboards are now available at https://github.com/elastic/uptime-contrib
+setup.dashboards.enabled: true
 
 # The directory from where to read the dashboards. The default is the `kibana`
 # folder in the home path.
@@ -1292,7 +1201,7 @@ setup.dashboards.enabled: false # Dashboards are now available at https://github
 # In case the archive contains the dashboards from multiple Beats, this lets you
 # select which one to load. You can load all the dashboards in the archive by
 # setting this to the empty string.
-#setup.dashboards.beat: heartbeat
+#setup.dashboards.beat: auditbeat
 
 # The name of the Kibana index to use for setting the configuration. Default is ".kibana"
 #setup.dashboards.kibana_index: .kibana
@@ -1324,13 +1233,13 @@ setup.dashboards.enabled: false # Dashboards are now available at https://github
 # Set to false to disable template loading.
 setup.template.enabled: true
 
-# Template name. By default the template name is "heartbeat-%{[agent.version]}"
+# Template name. By default the template name is "auditbeat-%{[agent.version]}"
 # The template name and pattern has to be set in case the Elasticsearch index pattern is modified.
-#setup.template.name: "heartbeat-%{[agent.version]}"
+#setup.template.name: "auditbeat-%{[agent.version]}"
 
-# Template pattern. By default the template pattern is "heartbeat-%{[agent.version]}" to apply to the default index settings.
+# Template pattern. By default the template pattern is "auditbeat-%{[agent.version]}" to apply to the default index settings.
 # The template name and pattern has to be set in case the Elasticsearch index pattern is modified.
-#setup.template.pattern: "heartbeat-%{[agent.version]}"
+#setup.template.pattern: "auditbeat-%{[agent.version]}"
 
 # Path to fields.yml file to generate the template
 #setup.template.fields: "${path.config}/fields.yml"
@@ -1354,7 +1263,7 @@ setup.template.enabled: true
 #setup.template.json.data_stream: false
 
 # Overwrite existing template
-# Do not enable this option for more than one instance of heartbeat as it might
+# Do not enable this option for more than one instance of auditbeat as it might
 # overload your Elasticsearch with too many update requests.
 setup.template.overwrite: true
 
@@ -1384,7 +1293,7 @@ setup.ilm.enabled: true
 
 # Set the lifecycle policy name. The default policy name is
 # 'beatname'.
-setup.ilm.policy_name: "heartbeat"
+setup.ilm.policy_name: "auditbeat"
 
 # The path to a JSON file that contains a lifecycle policy configuration. Used
 # to load your own lifecycle policy.
@@ -1509,7 +1418,7 @@ logging.level: info
 # Send all logging output to Windows Event Logs. The default is false.
 #logging.to_eventlog: false
 
-# If enabled, Heartbeat periodically logs its internal metrics that have changed
+# If enabled, Auditbeat periodically logs its internal metrics that have changed
 # in the last period. For each metric that changed, the delta from the value at
 # the beginning of the period is logged. Also, the total values for
 # all non-zero internal metrics are logged on shutdown. The default is true.
@@ -1529,10 +1438,10 @@ logging.metrics.enabled: false
 #logging.files:
   # Configure the path where the logs are written. The default is the logs directory
   # under the home path (the binary location).
-  #path: /var/log/heartbeat
+  #path: /var/log/auditbeat
 
   # The name of the files where the logs are written to.
-  #name: heartbeat
+  #name: auditbeat
 
   # Configure log file size limit. If limit is reached, log file will be
   # automatically rotated
@@ -1557,7 +1466,7 @@ logging.metrics.enabled: false
   # rotateonstartup: true
 
 # ============================= X-Pack Monitoring ==============================
-# Heartbeat can export internal metrics to a central Elasticsearch monitoring
+# Auditbeat can export internal metrics to a central Elasticsearch monitoring
 # cluster.  This requires xpack monitoring to be enabled in Elasticsearch.  The
 # reporting is disabled by default.
 
@@ -1565,7 +1474,7 @@ logging.metrics.enabled: false
 monitoring.enabled: false
 
 # Sets the UUID of the Elasticsearch cluster under which monitoring data for this
-# Heartbeat instance will appear in the Stack Monitoring UI. If output.elasticsearch
+# Auditbeat instance will appear in the Stack Monitoring UI. If output.elasticsearch
 # is enabled, the UUID is derived from the Elasticsearch cluster referenced by output.elasticsearch.
 #monitoring.cluster_uuid:
 
@@ -1770,12 +1679,12 @@ http.port: 5066
 
 # ============================== Instrumentation ===============================
 
-# Instrumentation support for the heartbeat.
+# Instrumentation support for the auditbeat.
 #instrumentation:
-    # Set to true to enable instrumentation of heartbeat.
+    # Set to true to enable instrumentation of auditbeat.
     #enabled: false
 
-    # Environment in which heartbeat is running on (eg: staging, production, etc.)
+    # Environment in which auditbeat is running on (eg: staging, production, etc.)
     #environment: ""
 
     # APM Server hosts to report instrumentation results to.

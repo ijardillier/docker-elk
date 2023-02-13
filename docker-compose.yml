@@ -420,7 +420,6 @@ services:
         condition: service_healthy
     image: docker.elastic.co/beats/heartbeat:${STACK_VERSION}
     container_name: heartbeat
-    #user: root
     restart: on-failure
     volumes:
       - type: bind
@@ -435,12 +434,42 @@ services:
         source: certs
         target: /usr/share/heartbeat/certs
         read_only: true
-      #- "/var/run/docker.sock:/var/run/docker.sock:ro"
-      #- "/var/lib/docker/containers:/var/lib/docker/containers:ro"
-      # - "/var/log:/hostfs/var/log:ro"
     command: heartbeat -e -strict.perms=false
     cap_add:
       - NET_RAW
+    networks:
+      - default
+
+  auditbeat:
+    depends_on:
+      es01:
+        condition: service_healthy
+      es02:
+        condition: service_healthy
+      es03:
+        condition: service_healthy
+    image: docker.elastic.co/beats/auditbeat:${STACK_VERSION}
+    container_name: auditbeat
+    user: root
+    restart: on-failure
+    volumes:
+      - type: bind
+        source: ./auditbeat/config/auditbeat.yml
+        target: /usr/share/auditbeat/auditbeat.yml
+        read_only: true
+      - type: bind
+        source: ./auditbeat/config/modules.d
+        target: /usr/share/auditbeat/modules.d
+        read_only: true
+      - type: volume
+        source: certs
+        target: /usr/share/auditbeat/certs
+        read_only: true
+    command: auditbeat -e -strict.perms=false
+    cap_add:
+      - AUDIT_CONTROL
+      - AUDIT_READ
+    pid: host
     networks:
       - default
 
