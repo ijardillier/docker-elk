@@ -473,6 +473,35 @@ services:
     networks:
       - default
 
+  packetbeat:
+    depends_on:
+      es01:
+        condition: service_healthy
+      es02:
+        condition: service_healthy
+      es03:
+        condition: service_healthy
+    image: docker.elastic.co/beats/packetbeat:${STACK_VERSION}
+    container_name: packetbeat
+    #user: root
+    restart: on-failure
+    volumes:
+      - type: bind
+        source: ./packetbeat/config/packetbeat.yml
+        target: /usr/share/packetbeat/packetbeat.yml
+        read_only: true
+      - type: volume
+        source: certs
+        target: /usr/share/packetbeat/certs
+        read_only: true
+    command: packetbeat -e -strict.perms=false
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    pid: host
+    networks:
+      - default
+
   logstash:
     depends_on:
       es01:
