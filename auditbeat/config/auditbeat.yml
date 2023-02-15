@@ -487,7 +487,7 @@ output.logstash:
   #ttl: 30s
 
   # Optionally load-balance events between Logstash hosts. Default is false.
-  loadbalance: false
+  #loadbalance: false
 
   # Number of batches to be sent asynchronously to Logstash while processing
   # new batches.
