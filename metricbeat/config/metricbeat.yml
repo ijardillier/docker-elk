@@ -20,7 +20,7 @@ metricbeat.config.modules:
   reload.period: 10s
 
   # Set to true to enable config reloading
-  reload.enabled: false
+  reload.enabled: true
 
 # Maximum amount of time to randomly delay the start of a metricset. Use 0 to
 # disable startup delay.
@@ -320,13 +320,13 @@ processors:
 # ---------------------------- Elasticsearch Output ----------------------------
 output.elasticsearch:
   # Boolean flag to enable or disable the output module.
-  enabled: false
+  enabled: true
 
   # Array of hosts to connect to.
   # Scheme and port can be left out and will be set to the default (http and 9200)
   # In case you specify and additional path, the scheme is required: http://localhost:9200/path
   # IPv6 addresses should always be defined as: https://[2001:db8::1]:9200
-  hosts: ["es01:9200","es02:9200"," es03:9200"]
+  hosts: ["es01:9200","es02:9200","es03:9200"]
 
   # Set gzip compression level.
   #compression_level: 0
@@ -485,7 +485,7 @@ output.elasticsearch:
 # ------------------------------ Logstash Output -------------------------------
 output.logstash:
   # Boolean flag to enable or disable the output module.
-  enabled: true
+  enabled: false
 
   # The Logstash hosts
   hosts: ["logstash:5044"]

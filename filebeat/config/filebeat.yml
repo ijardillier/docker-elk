@@ -917,11 +917,11 @@ filebeat.autodiscover:
 
 # Enable filebeat config reloading
 filebeat.config:
-  #inputs:
-    #enabled: false
-    #path: inputs.d/*.yml
-    #reload.enabled: true
-    #reload.period: 10s
+  inputs:
+    enabled: false
+    path: inputs.d/*.yml
+    reload.enabled: true
+    reload.period: 10s
   modules:
     enabled: true
     path: modules.d/*.yml
@@ -1199,7 +1199,7 @@ processors:
 # ---------------------------- Elasticsearch Output ----------------------------
 output.elasticsearch:
   # Boolean flag to enable or disable the output module.
-  enabled: false
+  enabled: true
 
   # Array of hosts to connect to.
   # Scheme and port can be left out and will be set to the default (http and 9200)
@@ -1364,7 +1364,7 @@ output.elasticsearch:
 # ------------------------------ Logstash Output -------------------------------
 output.logstash:
   # Boolean flag to enable or disable the output module.
-  enabled: true
+  enabled: false
 
   # The Logstash hosts
   hosts: ["logstash:5044"]

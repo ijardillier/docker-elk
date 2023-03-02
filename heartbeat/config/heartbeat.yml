@@ -16,7 +16,7 @@ heartbeat.config.monitors:
   # Directory + glob pattern to search for configuration files
   path: ${path.config}/monitors.d/*.yml
   # If enabled, heartbeat will periodically check the config.monitors path for changes
-  reload.enabled: false
+  reload.enabled: true
   # How often to check for changes
   reload.period: 10s
 
@@ -311,7 +311,7 @@ processors:
 # ---------------------------- Elasticsearch Output ----------------------------
 output.elasticsearch:
   # Boolean flag to enable or disable the output module.
-  enabled: false
+  enabled: true
 
   # Array of hosts to connect to.
   # Scheme and port can be left out and will be set to the default (http and 9200)
@@ -476,7 +476,7 @@ output.elasticsearch:
 # ------------------------------ Logstash Output -------------------------------
 output.logstash:
   # Boolean flag to enable or disable the output module.
-  enabled: true
+  enabled: false
 
   # The Logstash hosts
   hosts: ["logstash:5044"]

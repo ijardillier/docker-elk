@@ -7,7 +7,7 @@
     - cpu
     - diskio
   #  - event
-  #  - healthcheck
+    - healthcheck
     - info
     - memory
     - network

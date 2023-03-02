@@ -4,18 +4,33 @@
 # options. The elastic-agent.reference.yml file from the same directory contains all the
 # supported options with more comments. You can use it as a reference.
 
-name: Zenika
-
 ######################################
 # Fleet configuration
 ######################################
-# # outputs:
-# #   default:
-# #     type: elasticsearch
-# #     hosts: [127.0.0.1:9200]
-# #     api-key: "example-key"
-    # username: "elastic"
-    # password: "changeme"
+outputs:
+  default:
+#     type: elasticsearch
+#     hosts: ["https://es01:9200"]
+#     #api-key: "example-key"
+#     username: "elastic"
+#     password: "changeme"
+
+# output:
+#   elasticsearch:
+#     hosts: ["https://es01", "https://es02", "https://es03"]
+#     username: elastic
+#     password: changeme
+#     ssl.certificate_authorities: /usr/share/elastic-agent/certs/ca/ca.crt
+
+# fleet:
+#   agent:
+#     id: fleet-server
+
+# ssl.certificate_authorities: [/usr/share/elastic-agent/certs/ca/ca.crt] 
+# ssl.certificate: /usr/share/elastic-agent/certs/fleet-server/fleet-server.crt
+# ssl.key: /usr/share/elastic-agent/certs/fleet-server/fleet-server.key
+# ssl.verification _mode: none # certificate
+# ssl.client_authentication: none
 
 # # inputs:
 # #   - type: system/metrics
@@ -132,14 +147,11 @@ agent.monitoring:
 
 # # Allow fleet to reload its configuration locally on disk.
 # # Notes: Only specific process configuration and external input configurations will be reloaded.
-# agent.reload:
-#   # enabled configure the Elastic Agent to reload or not the local configuration.
-#   #
-#   # Default is true
-#   enabled: true
-
-#   # period define how frequent we should look for changes in the configuration.
-#   period: 10s
+agent.reload:
+  # enabled configure the Elastic Agent to reload or not the local configuration.
+  enabled: true
+  # period define how frequent we should look for changes in the configuration.
+  period: 10s
 
 # Logging
 
@@ -148,7 +160,7 @@ agent.monitoring:
 
 # Sets log level. The default log level is info.
 # Available log levels are: error, warning, info, debug
-#agent.logging.level: info
+agent.logging.level: error
 
 # Enable debug output for selected components. To enable all selectors use ["*"]
 # Other available selectors are "beat", "publish", "service"
@@ -208,7 +220,7 @@ agent.logging.to_stderr: true
   # rotateonstartup: true
 
 # Set to true to log messages in JSON format.
-#agent.logging.json: false
+agent.logging.json: true
 
 # Providers
 

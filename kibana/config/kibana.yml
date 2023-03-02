@@ -1,45 +1,148 @@
 ---
+# For more configuration options see the configuration guide for Kibana in
+# https://www.elastic.co/guide/index.html
+
+# =================== System: Kibana Server ===================
+
+# Specifies the address to which the Kibana server will bind. IP addresses and host names are both valid values.
+# The default is 'localhost', which usually means remote machines will not be able to connect.
+# To allow connections from remote users, set this parameter to a non-loopback address.
 server.host: "0.0.0.0"
+
+# The Kibana server's name. This is used for display purposes.
 server.name: "kibana"
 
+# =================== System: Elasticsearch ===================
+# The URLs of the Elasticsearch instances to use for all your queries.
+elasticsearch.hosts: ["https://es01:9200","https://es02:9200","https://es03:9200"]
+
+# If your Elasticsearch is protected with basic authentication, these settings provide
+# the username and password that the Kibana server uses to perform maintenance on the Kibana
+# index at startup. Your Kibana users still need to authenticate with Elasticsearch, which
+# is proxied through the Kibana server.
 elasticsearch.username: "kibana_system"
+#elasticsearch.password: "pass" ### ENV ###
+
+# Enables you to specify a path to the PEM file for the certificate
+# authority for your Elasticsearch instance.
 elasticsearch.ssl.certificateAuthorities: [ "config/certs/ca/ca.crt" ]
 
-xpack.encryptedSavedObjects.encryptionKey: dc3bfa3b97a605d4b07a4fbddfd63029
-xpack.reporting.encryptionKey: 3072aa993391749a7cfd4db97f9df7ca
-xpack.security.encryptionKey: cccb93bfad885f795824230543c6bd6c
+# =================== System: Logging ===================
 
-xpack.fleet.agents.elasticsearch.hosts: ["https://es01:9200","https://es02:9200","https://es03:9200"]
+# Set the value of this setting to off to suppress all logging output, or to debug to log everything. Defaults to 'info'
+#logging.root.level: debug
 
-xpack.fleet.packages:
-  - name: fleet_server
-    version: latest
-  - name: system
-    version: latest
-
-xpack.fleet.agentPolicies:
-  - name: Fleet Server Policy
-    id: fleet-server-policy
-    description: Fleet Server policy owned by Kibana
-    namespace: default
-    monitoring_enabled: ['logs', 'metrics']
-    is_managed: false
-    is_default: true
-    is_default_fleet_server: true
-    package_policies: 
-      - name: fleet_server-1
-        id: fleet_server-1
-        package:
-          name: fleet_server  
-      - name: system-1
-        id: system-1
-        package:
-          name: system    
-      
-monitoring.ui.container.elasticsearch.enabled: true
-monitoring.ui.container.logstash.enabled: true
-
+# Enables you to specify a place where Kibana stores log output.
 logging.appenders.default:
   type: console
   layout: 
     type: json
+
+# Specifies locale to be used for all localizable strings, dates and number formats.
+# Supported languages are the following: English (default) "en", Chinese "zh-CN", Japanese "ja-JP", French "fr-FR".
+i18n.locale: "fr"
+
+# =================== Monitoring ==================
+
+# For Elasticsearch clusters that are running in containers, this setting changes the Node Listing to display
+# the CPU utilization based on the reported Cgroup statistics. It also adds the calculated Cgroup CPU utilization 
+# to the Node Overview page instead of the overall operating system’s CPU utilization.
+monitoring.ui.container.elasticsearch.enabled: true
+
+# For Logstash nodes that are running in containers, this setting changes the Logstash Node Listing to display 
+# the CPU utilization based on the reported Cgroup statistics. It also adds the calculated Cgroup CPU utilization 
+# to the Logstash node detail pages instead of the overall operating system’s CPU utilization.
+monitoring.ui.container.logstash.enabled: true
+
+# =================== Security ===================
+
+# Set an encryption key so that sessions are not invalidated.
+xpack.security.encryptionKey: cccb93bfad885f795824230543c6bd6c
+
+# =================== Alerting and action ===================
+
+# A string of 32 or more characters used to encrypt sensitive properties on alerting rules and actions
+# before they’re stored in Elasticsearch. Third party credentials — such as the username and password
+# used to connect to an SMTP service — are an example of encrypted properties.
+xpack.encryptedSavedObjects.encryptionKey: dc3bfa3b97a605d4b07a4fbddfd63029
+
+# =================== Reporting ===================
+
+# The static encryption key for reporting. Use an alphanumeric text string that is at least 32 characters. 
+# By default, Kibana generates a random key when it starts, which causes pending reports to fail after restart. 
+# Configure xpack.reporting.encryptionKey to preserve the same key across multiple restarts and multiple Kibana instances.
+xpack.reporting.encryptionKey: 3072aa993391749a7cfd4db97f9df7ca
+
+# =================== Fleet ===================
+
+# Hostnames used by Elastic Agent for accessing Fleet Server.
+# If configured in your kibana.yml, this setting is grayed out and unavailable in the Fleet UI. 
+# To make this setting editable in the UI, do not configure it in the configuration file.
+xpack.fleet.agents.fleet_server.hosts: ["https://fleet-server:8220"]
+
+# Hostnames used by Elastic Agent for accessing Elasticsearch.
+#xpack.fleet.agents.elasticsearch.hosts: ["https://es01:9200","https://es02:9200","https://es03:9200"]
+# xpack.fleet.agents.elasticsearch.ca_sha256: |
+#   c2hhMjU2IEZpbmdlcnByaW50PTEwOjZBOjYwOkY4OjBEOjQ4OkVCOjk1OjQwOjVD
+#   OjdCOkZFOkMwOjYwOjU5OjcxOjUwOkFGOjg4OkZFOjI4OjIzOkNEOjQyOjNCOjY0
+#   OjU0OkY1Ojg4OkUxOjFBOjQ3Cg==
+# xpack.fleet.agents.elasticsearch.config_yaml:   
+#   ssl.certificate_authorities: [ "/usr/share/elastic-agent/certs/ca/ca.crt" ]
+
+# List of integrations that are installed when the Fleet app starts up for the first time.
+xpack.fleet.packages:
+  - name: system # Name of the integration from the package registry.
+    version: latest # Either an exact semantic version, or the keyword latest to fetch the latest integration version.
+  - name: fleet_server 
+    version: latest 
+  - name: elastic_agent
+    version: latest
+  - name: apm
+    version: latest
+
+# List of agent policies that are configured when the Fleet app starts.
+xpack.fleet.agentPolicies:
+  - name: Fleet Server Policy # Policy name. 
+    id: fleet_server_policy # Unique ID for this policy. The ID may be a number or string.  
+    description: Fleet Server policy owned by Kibana # Text description of this policy.
+    namespace: default # String identifying this policy’s namespace.
+    monitoring_enabled: ['logs', 'metrics'] # List of keywords that specify the monitoring data to collect.
+    is_managed: true # If true, this policy is not editable by the user and can only be changed by updating the Kibana config.
+    is_default_fleet_server: true # If true, this policy is the default Fleet Server agent policy.
+    package_policies: # List of integration policies to add to this policy.
+      - name: fleet_server-1 # Name of the integration policy.
+        id: fleet_server-1 # Unique ID of the integration policy. The ID may be a number or string.
+        package: # Integration that this policy configures.
+          name: fleet_server # Name of the integration associated with this policy.
+  - name: Agent Policy
+    id: agent_policy
+    description: Fleet Server policy owned by Kibana
+    namespace: default
+    monitoring_enabled: ['logs', 'metrics']
+    is_managed: false
+    is_default: true # If true, this policy is the default agent policy.
+    package_policies:
+      - name: system-1 # Name of the integration policy.
+        id: system-1 # Unique ID of the integration policy. The ID may be a number or string.
+        package: # Integration that this policy configures.
+          name: system # Name of the integration associated with this policy.
+      - name: elastic_agent-1
+        id: elastic_agent-1
+        package:
+          name: elastic_agent
+      - name: apm-1
+        id: apm-1
+        package:
+          name: apm
+
+# List of outputs that are configured when the Fleet app starts.
+xpack.fleet.outputs:
+  - id: fleet-default-output
+    name: Defaults
+    type: elasticsearch
+    hosts: ["https://es01:9200","https://es02:9200","https://es03:9200"]
+    is_default: true
+    is_default_monitoring: true
+    config:
+      ssl.certificate_authorities: [ "/usr/share/elastic-agent/certs/ca/ca.crt" ]
+      

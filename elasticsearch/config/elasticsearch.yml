@@ -1,12 +1,60 @@
 ---
+# ======================== Elasticsearch Configuration =========================
+#
+# NOTE: Elasticsearch comes with reasonable defaults for most settings.
+#       Before you set out to tweak and tune the configuration, make sure you
+#       understand what are you trying to accomplish and the consequences.
+#
+# The primary way of configuring a node is via this file. This template lists
+# the most important settings you may want to configure for a production cluster.
+#
+# Please consult the documentation for further information on configuration options:
+# https://www.elastic.co/guide/en/elasticsearch/reference/index.html
+#
+# ---------------------------------- Cluster -----------------------------------
+
+# Use a descriptive name for your cluster:
+#cluster.name: my-application ### ENV ###
+
+# ----------------------------------- Memory -----------------------------------
+
+# Lock the memory on startup:
 bootstrap.memory_lock: true
 
+# Make sure that the heap size is set to about half the memory available
+# on the system and that the owner of the process is allowed to use this
+# limit.
+#
+# Elasticsearch performs poorly when the system is swapping the memory.
+
+# ---------------------------------- Network -----------------------------------
+
+# By default Elasticsearch is only accessible on localhost. Set a different
+# address here to expose this node on the network:
 network.host: 0.0.0.0
 
+# --------------------------------- Discovery ----------------------------------
+
+# Pass an initial list of hosts to perform discovery when this node is started:
+# The default list of hosts is ["127.0.0.1", "[::1]"]
+#discovery.seed_hosts: ["host1", "host2"]
+
+# Bootstrap the cluster using an initial set of master-eligible nodes:
+cluster.initial_master_nodes: ["es01", "es02", "es03"]
+
+# For more information, consult the discovery and cluster formation module documentation.
+
+# --------------------------------- Security -----------------------------------
+
+# Enables Elasticsearch security features on the node.
 xpack.security.enabled: true
+
+# Encrypt HTTP client communications for Elasticsearch
 xpack.security.http.ssl.enabled: true
 xpack.security.http.ssl.certificate_authorities: certs/ca/ca.crt
 xpack.security.http.ssl.verification_mode: certificate
+
+# Encrypt TLS/SSL communications for nodes
 xpack.security.transport.ssl.enabled: true
 xpack.security.transport.ssl.certificate_authorities: certs/ca/ca.crt
 xpack.security.transport.ssl.verification_mode: certificate

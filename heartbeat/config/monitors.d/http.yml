@@ -42,7 +42,7 @@
   # system defaults will be used.
   ssl:
   # Certificate Authorities
-  certificate_authorities: ["/usr/share/heartbeat/certs/ca/ca.crt"]
+    certificate_authorities: ["/usr/share/heartbeat/certs/ca/ca.crt"]
 
   # Required TLS protocols
   #supported_protocols: ["TLSv1.0", "TLSv1.1", "TLSv1.2"]
