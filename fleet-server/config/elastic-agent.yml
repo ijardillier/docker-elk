@@ -7,30 +7,37 @@
 ######################################
 # Fleet configuration
 ######################################
-outputs:
-  default:
+# outputs:
+#   default:
 #     type: elasticsearch
-#     hosts: ["https://es01:9200"]
-#     #api-key: "example-key"
-#     username: "elastic"
-#     password: "changeme"
-
-# output:
-#   elasticsearch:
+#     hosts: ["https://es01", "https://es02", "https://es03"]
+#     username: elastic
+#     password: changeme
+#     #service_token: AAEAAWVsYXN0aWMvZmxlZXQtc2VydmVyL3Rva2VuLTE2Nzc2ODI2OTkyMTk6Qk5oNGxFOXpRTU81Z1hKVWZwVU8wQQ
+#     ssl.certificate_authorities: /usr/share/elastic-agent/certs/ca/ca.crt
+#   monitoring:
+#     type: elasticsearch
 #     hosts: ["https://es01", "https://es02", "https://es03"]
 #     username: elastic
 #     password: changeme
 #     ssl.certificate_authorities: /usr/share/elastic-agent/certs/ca/ca.crt
 
-# fleet:
-#   agent:
-#     id: fleet-server
+fleet:
+  agent:
+    id: fleet-server
 
-# ssl.certificate_authorities: [/usr/share/elastic-agent/certs/ca/ca.crt] 
 # ssl.certificate: /usr/share/elastic-agent/certs/fleet-server/fleet-server.crt
 # ssl.key: /usr/share/elastic-agent/certs/fleet-server/fleet-server.key
-# ssl.verification _mode: none # certificate
-# ssl.client_authentication: none
+
+inputs:
+  - type: fleet-server
+    policy.id: fleet_server_policy
+    server:
+      ssl:
+        enabled: true
+        certificate: /usr/share/elastic-agent/certs/fleet-server/fleet-server.crt
+        key: /usr/share/elastic-agent/certs/fleet-server/fleet-server.key
+        #key_passphrase: /usr/share/elastic-agent/certs/ca/ca.crt
 
 # # inputs:
 # #   - type: system/metrics
@@ -125,7 +132,7 @@ outputs:
 
 agent.monitoring:
   # enabled turns on monitoring of running processes
-  enabled: true
+  enabled: false
   # enables log monitoring
   logs: true
   # enables metrics monitoring
@@ -158,9 +165,11 @@ agent.reload:
 # There are four options for the log output: file, stderr, syslog, eventlog
 # The file output is the default.
 
+agent.logging.pretty: true
+
 # Sets log level. The default log level is info.
 # Available log levels are: error, warning, info, debug
-agent.logging.level: error
+agent.logging.level: warning
 
 # Enable debug output for selected components. To enable all selectors use ["*"]
 # Other available selectors are "beat", "publish", "service"
@@ -228,25 +237,25 @@ agent.logging.json: true
 # and conditionals. Each provider's keys are automatically prefixed with the name
 # of the provider.
 
-#providers:
+# providers:
 
-# Agent provides information about the running agent.
-#  agent:
-#    enabled: true
+# # Agent provides information about the running agent.
+#   agent:
+#     enabled: true
 
 # Docker provides inventory information from Docker.
-#  docker:
-#    enabled: true
-#    host: "unix:///var/run/docker.sock"
-#    cleanup_timeout: 60
+  docker:
+    enabled: false
+    host: "unix:///var/run/docker.sock"
+    cleanup_timeout: 60
 
-# Env providers information about the running environment.
-#  env:
-#    enabled: true
+# # Env providers information about the running environment.
+#   env:
+#     enabled: true
 
-# Host provides information about the current host.
-#  host:
-#    enabled: true
+# # Host provides information about the current host.
+#   host:
+#     enabled: true
 
 # Local provides custom keys to use as variable.
 #  local:
