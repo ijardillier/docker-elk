@@ -110,10 +110,58 @@ xpack.fleet.agentPolicies:
     is_managed: true # If true, this policy is not editable by the user and can only be changed by updating the Kibana config.
     is_default_fleet_server: true # If true, this policy is the default Fleet Server agent policy.
     package_policies: # List of integration policies to add to this policy.
+      - name: system-1
+        package:
+          name: system
       - name: fleet_server-1 # Name of the integration policy.
-        id: fleet_server-1 # Unique ID of the integration policy. The ID may be a number or string.
         package: # Integration that this policy configures.
           name: fleet_server # Name of the integration associated with this policy.
+        inputs:
+          - type: fleet-server
+            keep_enabled: true
+            vars:
+              - name: host
+                value: 0.0.0.0
+                frozen: false
+              - name: port
+                value: 8220
+                frozen: false
+  - name: APM Server Policy
+    id: apm_server_policy
+    description: APM Server Server policy owned by Kibana
+    namespace: default
+    monitoring_enabled: ['logs', 'metrics']
+    is_managed: false
+    is_default: false
+    package_policies:
+      - name: system-1
+        package:
+          name: system
+      - name: apm-1
+        package:
+          name: apm
+        inputs:
+          - type: apm
+            keep_enabled: true
+            vars:
+              - name: host
+                value: 0.0.0.0:8200
+                frozen: false
+              - name: url
+                value: "https://apm-server:8200"
+                frozen: false
+              - name: enable_rum
+                value: true
+                frozen: false
+              - name: tls_enabled
+                value: true
+                frozen: false
+              - name: tls_certificate
+                value: /usr/share/elastic-agent/certs/fleet-server/apm-server.crt
+                frozen: false
+              - name: tls_key
+                value: /usr/share/elastic-agent/certs/fleet-server/apm-server.key
+                frozen: false
   - name: Agent Policy
     id: agent_policy
     description: Fleet Server policy owned by Kibana
@@ -130,10 +178,6 @@ xpack.fleet.agentPolicies:
         id: elastic_agent-1
         package:
           name: elastic_agent
-      - name: apm-1
-        id: apm-1
-        package:
-          name: apm
 
 # List of outputs that are configured when the Fleet app starts.
 xpack.fleet.outputs:

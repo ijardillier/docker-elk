@@ -24,18 +24,14 @@
 
 fleet:
   agent:
-    id: fleet-server
+    id: apm-server
 
 inputs:
-  - type: fleet-server
-    policy.id: fleet_server_policy
+  - type: apm
+    policy.id: apm_server_policy
     data_stream.namespace: default
     use_output: default
-    server:
-      ssl:
-        enabled: true
-        certificate: /usr/share/elastic-agent/certs/fleet-server/fleet-server.crt
-        key: /usr/share/elastic-agent/certs/fleet-server/fleet-server.key
+
 
 # # inputs:
 # #   - type: system/metrics
@@ -54,26 +50,6 @@ inputs:
 # #         data_stream.dataset: system.network
 # #       - metricset: filesystem
 # #         data_stream.dataset: system.filesystem
-
-# - name: system-metrics 
-#   type: system/metrics 
-#   use_output: default 
-#   meta:
-#     package: 
-#       name: system
-#       version: 0.10.9
-#   data_stream:
-#     namespace: default 
-#   streams:
-#     - data_stream:
-#         dataset: system.cpu 
-#         type: metrics 
-#       metricsets: 
-#         - cpu
-#       period: 10s
-#       cpu.metrics:
-#         - percentages
-#         - normalized_percentages
 
 # management:
 #   # Mode of management, the Elastic Agent support two modes of operation:
