@@ -2,13 +2,15 @@
 # Docs: https://www.elastic.co/guide/en/beats/metricbeat/8.3/metricbeat-module-openmetrics.html
 
 - module: openmetrics
-  metricsets: ['collector']
+  #metricsets: ['collector']
   period: 10s
   hosts: ['prometheus:9090']
+  metrics_path: /metrics
 
-  # This module uses the Prometheus collector metricset, all
-  # the options for this metricset are also available here.
+- module: openmetrics
+  period: 10s
+  metricsets: ["collector"]
+  hosts: ["host.docker.internal:9091"]
   metrics_path: /metrics
   metrics_filters:
-    include: []
-    exclude: []
+    include: ["myapp*"]
