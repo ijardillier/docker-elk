@@ -453,6 +453,8 @@ services:
     mem_limit: ${AGENT_MEM_LIMIT}
     networks:
       - default
+    extra_hosts:
+    - "host.docker.internal:host-gateway"
 
   heartbeat:
     depends_on:
