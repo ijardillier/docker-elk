@@ -148,7 +148,7 @@ xpack.fleet.agentPolicies:
                 value: 0.0.0.0:8200
                 frozen: false
               - name: url
-                value: "https://apm-server:8200"
+                value: "https://localhost:8200"
                 frozen: false
               - name: enable_rum
                 value: true
@@ -157,14 +157,14 @@ xpack.fleet.agentPolicies:
                 value: true
                 frozen: false
               - name: tls_certificate
-                value: /usr/share/elastic-agent/certs/fleet-server/apm-server.crt
+                value: /usr/share/elastic-agent/certs/apm-server/apm-server.crt
                 frozen: false
               - name: tls_key
-                value: /usr/share/elastic-agent/certs/fleet-server/apm-server.key
+                value: /usr/share/elastic-agent/certs/apm-server/apm-server.key
                 frozen: false
   - name: Agent Policy
     id: agent_policy
-    description: Fleet Server policy owned by Kibana
+    description: Fleet Agent policy owned by Kibana
     namespace: default
     monitoring_enabled: ['logs', 'metrics']
     is_managed: false
