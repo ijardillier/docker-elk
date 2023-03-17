@@ -20,7 +20,18 @@
   schedule: '@every 5s' # every 5 seconds from start of beat
 
   # Configure URLs to ping
-  urls: ["https://es01:9200", "https://es02:9200", "https://es03:9200", "http://filebeat:5066", "http://metricbeat:5066", "http://heartbeat:5066"]
+  urls: 
+  - "https://es01:9200"
+  - "https://es02:9200"
+  - "https://es03:9200"
+  - "http://filebeat:5066"
+  - "http://metricbeat:5066"
+  - "http://heartbeat:5066"
+  - "http://auditbeat:5066"
+  - "http://packetbeat:5066"
+  - "https://fleet-server:8220/api/status"
+  - "https://apm-server:8200"
+  - "http://host.docker.internal:8080/liveness"
 
   # Configure IP protocol types to ping on if hostnames are configured.
   # Ping all resolvable IPs if `mode` is `all`, or only one IP if `mode` is `any`.
