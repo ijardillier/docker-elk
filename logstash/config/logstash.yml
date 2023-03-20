@@ -309,7 +309,7 @@ log.level: info
 # X-Pack Monitoring
 # https://www.elastic.co/guide/en/logstash/current/monitoring-logstash.html
 monitoring.enabled: false
-monitoring.cluster_uuid: "iQ5l-feLScKfWHHMmZ2Emg"
+#monitoring.cluster_uuid: "iQ5l-feLScKfWHHMmZ2Emg"
 #
 # X-Pack Management
 # https://www.elastic.co/guide/en/logstash/current/logstash-centralized-pipeline-management.html
