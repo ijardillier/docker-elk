@@ -4,7 +4,7 @@
 - module: openmetrics
   period: 10s
   metricsets: ["collector"]
-  hosts: ["host.docker.internal:9091"]
-  metrics_path: /metrics?accept=application/openmetrics-text
+  hosts: ["host.docker.internal:8080"]
+  metrics_path: /metrics
   metrics_filters:
     include: ["myapp*"]
