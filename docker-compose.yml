@@ -15,17 +15,17 @@ services:
         if [ x${ELASTIC_PASSWORD} == x ]; then
           echo "Set the ELASTIC_PASSWORD environment variable in the .env file";
           exit 1;
-        elif [ x${KIBANA_PASSWORD} == x ]; then
-          echo "Set the KIBANA_PASSWORD environment variable in the .env file";
+        elif [ x${KIBANA_SYSTEM_PASSWORD} == x ]; then
+          echo "Set the KIBANA_SYSTEM_PASSWORD environment variable in the .env file";
           exit 1;
-        elif [ x${LOGSTASH_PASSWORD} == x ]; then
-          echo "Set the LOGSTASH_PASSWORD environment variable in the .env file";
+        elif [ x${LOGSTASH_SYSTEM_PASSWORD} == x ]; then
+          echo "Set the LOGSTASH_SYSTEM_PASSWORD environment variable in the .env file";
           exit 1;
-        elif [ x${BEATS_PASSWORD} == x ]; then
-          echo "Set the BEATS_PASSWORD environment variable in the .env file";
+        elif [ x${BEATS_SYSTEM_PASSWORD} == x ]; then
+          echo "Set the BEATS_SYSTEM_PASSWORD environment variable in the .env file";
           exit 1;
-        elif [ x${REMOTE_MONITORING_PASSWORD} == x ]; then
-          echo "Set the REMOTE_MONITORING_PASSWORD environment variable in the .env file";
+        elif [ x${REMOTE_MONITORING_USER_PASSWORD} == x ]; then
+          echo "Set the REMOTE_MONITORING_USER_PASSWORD environment variable in the .env file";
           exit 1;
         fi;
         if [ ! -f config/certs/ca.zip ]; then
@@ -78,13 +78,13 @@ services:
         echo "Waiting for Elasticsearch availability";
         until curl -s --cacert config/certs/ca/ca.crt https://es01:9200 | grep -q "missing authentication credentials"; do sleep 30; done;
         echo "Setting kibana_system password";
-        until curl -s -X POST --cacert config/certs/ca/ca.crt -u "elastic:${ELASTIC_PASSWORD}" -H "Content-Type: application/json" https://es01:9200/_security/user/kibana_system/_password -d "{\"password\":\"${KIBANA_PASSWORD}\"}" | grep -q "^{}"; do sleep 10; done;
+        until curl -s -X POST --cacert config/certs/ca/ca.crt -u "elastic:${ELASTIC_PASSWORD}" -H "Content-Type: application/json" https://es01:9200/_security/user/kibana_system/_password -d "{\"password\":\"${KIBANA_SYSTEM_PASSWORD}\"}" | grep -q "^{}"; do sleep 10; done;
         echo "Setting logstash_system password";
-        until curl -s -X POST --cacert config/certs/ca/ca.crt -u "elastic:${ELASTIC_PASSWORD}" -H "Content-Type: application/json" https://es01:9200/_security/user/logstash_system/_password -d "{\"password\":\"${LOGSTASH_PASSWORD}\"}" | grep -q "^{}"; do sleep 10; done;
+        until curl -s -X POST --cacert config/certs/ca/ca.crt -u "elastic:${ELASTIC_PASSWORD}" -H "Content-Type: application/json" https://es01:9200/_security/user/logstash_system/_password -d "{\"password\":\"${LOGSTASH_SYSTEM_PASSWORD}\"}" | grep -q "^{}"; do sleep 10; done;
         echo "Setting beats_system password";
-        until curl -s -X POST --cacert config/certs/ca/ca.crt -u "elastic:${ELASTIC_PASSWORD}" -H "Content-Type: application/json" https://es01:9200/_security/user/beats_system/_password -d "{\"password\":\"${BEATS_PASSWORD}\"}" | grep -q "^{}"; do sleep 10; done;
+        until curl -s -X POST --cacert config/certs/ca/ca.crt -u "elastic:${ELASTIC_PASSWORD}" -H "Content-Type: application/json" https://es01:9200/_security/user/beats_system/_password -d "{\"password\":\"${BEATS_SYSTEM_PASSWORD}\"}" | grep -q "^{}"; do sleep 10; done;
         echo "Setting remote_monitoring_user password";
-        until curl -s -X POST --cacert config/certs/ca/ca.crt -u "elastic:${ELASTIC_PASSWORD}" -H "Content-Type: application/json" https://es01:9200/_security/user/remote_monitoring_user/_password -d "{\"password\":\"${REMOTE_MONITORING_PASSWORD}\"}" | grep -q "^{}"; do sleep 10; done;
+        until curl -s -X POST --cacert config/certs/ca/ca.crt -u "elastic:${ELASTIC_PASSWORD}" -H "Content-Type: application/json" https://es01:9200/_security/user/remote_monitoring_user/_password -d "{\"password\":\"${REMOTE_MONITORING_USER_PASSWORD}\"}" | grep -q "^{}"; do sleep 10; done;
         echo "All done!";
       '
     healthcheck:

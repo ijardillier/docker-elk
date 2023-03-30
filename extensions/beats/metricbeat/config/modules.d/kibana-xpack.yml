@@ -5,5 +5,5 @@
   xpack.enabled: true
   period: 10s
   hosts: ["kibana:5601"]
-  username: elastic
-  password: ${ELASTIC_PASSWORD}
+  username: remote_monitoring_user
+  password: ${REMOTE_MONITORING_USER_PASSWORD}

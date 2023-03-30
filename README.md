@@ -108,7 +108,7 @@ The passwords are defined in the .env file. **Don't forget to change them before
 
 1. Replace usernames and passwords in configuration files
 
-The `logstash_system` and `beats_system` users are not used at this time.
+The `logstash_system` and `beats_system` users are no more used since logstash and beats monitoring is now done with metricbeat.
 
 Normally, you should use the `remote_monitoring_user` password in Metricbeat xpack modules configuration files (`metricbeat/config/modules.d/*-xpack.yml`) but this is no more working at this time.
 
