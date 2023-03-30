@@ -23,6 +23,14 @@ Default exposed ports are:
 
 You can change them in .env file.
 
+## Injecting data
+
+All beats agents are configured to automatically send their data (logs, metrics and synthetics) from our stack to elasticsearch. It will create filebeat-{version} and metricbeat-{version} datastreams.
+
+Logstash is configured for Beats input on 5044 port. So, if you change the output to Logstash in your beats configuration, beats agents will send their data to Logstash before. It will create logs-*, metrics-*, sythetics-* datastreams instead.
+
+Stack Monitoring is available thanks to Metricbeat xpack modules.
+
 ## Documentation
 
 [Beats Reference](https://www.elastic.co/fr/beats/)

@@ -34,6 +34,22 @@ Default exposed ports are:
 
 You can change them in .env file.
 
+## Injecting data
+
+You can use Logstash to inject some log entries. The shipped Logstash configuration allows
+you to send content via TCP:
+
+
+```console
+# Using BSD netcat (Debian, Ubuntu, MacOS system, ...)
+$ cat /path/to/logfile.log | nc -q0 localhost 5000
+```
+
+```console
+# Using GNU netcat (CentOS, Fedora, MacOS Homebrew, ...)
+$ cat /path/to/logfile.log | nc -c localhost 5000
+```
+
 ## Documentation
 
 [Logstash Reference](https://www.elastic.co/guide/en/logstash/8.6/introduction.html)
