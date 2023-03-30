@@ -2,25 +2,8 @@ version: '3.8'
 
 services:
 
-  prometheus:
-    image: prom/prometheus:${PROMETHEUS_VERSION}
-    container_name: prometheus
-    volumes:
-      - type: bind
-        source: ./prometheus/config/prometheus.yml
-        target: /etc/prometheus/prometheus.yml
-        read_only: true
-      - type: volume
-        source: prometheus_data
-        target: /usr/share/prometheus/data
-    ports:
-      - "9090:9090"
-    mem_limit: ${MEM_LIMIT}
-    networks:
-      - default
-
   setup:
-    image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
+    image: docker.elastic.co/elasticsearch/elasticsearch:${ELASTIC_STACK_VERSION}
     container_name: es00
     volumes:
       - type: volume
@@ -114,7 +97,7 @@ services:
     depends_on:
       setup:
         condition: service_healthy
-    image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
+    image: docker.elastic.co/elasticsearch/elasticsearch:${ELASTIC_STACK_VERSION}
     container_name: es01
     volumes:
       - type: bind
@@ -129,13 +112,13 @@ services:
         source: es01_data
         target: /usr/share/elasticsearch/data
     ports:
-      - ${ES01_PORT}:9200
+      - ${ES_PORT_01}:9200
     environment:
       - node.name=es01
-      - cluster.name=${CLUSTER_NAME}
+      - cluster.name=${ES_CLUSTER_NAME}
       - discovery.seed_hosts=es02,es03
       - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
-      - xpack.license.self_generated.type=${LICENSE}
+      - xpack.license.self_generated.type=${ES_LICENSE}
       - xpack.security.http.ssl.key=certs/es01/es01.key
       - xpack.security.http.ssl.certificate=certs/es01/es01.crt
       - xpack.security.transport.ssl.key=certs/es01/es01.key
@@ -160,7 +143,7 @@ services:
   es02:
     depends_on:
       - es01
-    image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
+    image: docker.elastic.co/elasticsearch/elasticsearch:${ELASTIC_STACK_VERSION}
     container_name: es02
     volumes:
       - type: bind
@@ -175,13 +158,13 @@ services:
         source: es02_data
         target: /usr/share/elasticsearch/data
     ports:
-      - ${ES02_PORT}:9200
+      - ${ES_PORT_02}:9200
     environment:
       - node.name=es02
-      - cluster.name=${CLUSTER_NAME}
+      - cluster.name=${ES_CLUSTER_NAME}
       - discovery.seed_hosts=es01,es03
       - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
-      - xpack.license.self_generated.type=${LICENSE}
+      - xpack.license.self_generated.type=${ES_LICENSE}
       - xpack.security.http.ssl.key=certs/es02/es02.key
       - xpack.security.http.ssl.certificate=certs/es02/es02.crt
       - xpack.security.transport.ssl.key=certs/es02/es02.key
@@ -206,7 +189,7 @@ services:
   es03:
     depends_on:
       - es02
-    image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
+    image: docker.elastic.co/elasticsearch/elasticsearch:${ELASTIC_STACK_VERSION}
     container_name: es03
     volumes:
       - type: bind
@@ -221,13 +204,13 @@ services:
         source: es03_data
         target: /usr/share/elasticsearch/data
     ports:
-      - ${ES03_PORT}:9200
+      - ${ES_PORT_03}:9200
     environment:
-      - node.name=es03
-      - cluster.name=${CLUSTER_NAME}
-      - discovery.seed_hosts=es01,es02
       - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
-      - xpack.license.self_generated.type=${LICENSE}
+      - cluster.name=${ES_CLUSTER_NAME}
+      - node.name=es03
+      - discovery.seed_hosts=es01,es02
+      - xpack.license.self_generated.type=${ES_LICENSE}
       - xpack.security.http.ssl.key=certs/es03/es03.key
       - xpack.security.http.ssl.certificate=certs/es03/es03.crt
       - xpack.security.transport.ssl.key=certs/es03/es03.key
@@ -257,7 +240,7 @@ services:
         condition: service_healthy
       es03:
         condition: service_healthy
-    image: docker.elastic.co/kibana/kibana:${STACK_VERSION}
+    image: docker.elastic.co/kibana/kibana:${ELASTIC_STACK_VERSION}
     container_name: kibana
     restart: on-failure
     volumes:
@@ -275,8 +258,8 @@ services:
     ports:
       - ${KIBANA_PORT}:5601
     environment:
-      - ELASTICSEARCH_PASSWORD=${KIBANA_PASSWORD}
-    mem_limit: ${MEM_LIMIT}
+      - ELASTICSEARCH_PASSWORD=${ELASTIC_PASSWORD}
+    mem_limit: ${KBN_MEM_LIMIT}
     networks:
       - default
     healthcheck:
@@ -284,325 +267,6 @@ services:
         [
           "CMD-SHELL",
           "curl -s -I http://localhost:5601 | grep -q 'HTTP/1.1 302 Found'",
-        ]
-      interval: 10s
-      timeout: 10s
-      retries: 120
-
-  fleet-server:
-    depends_on:
-      es01:
-        condition: service_healthy
-      es02:
-        condition: service_healthy
-      es03:
-        condition: service_healthy
-      kibana:
-        condition: service_healthy
-    image: docker.elastic.co/beats/elastic-agent:${STACK_VERSION}
-    container_name: fleet-server
-    user: elastic-agent
-    restart: on-failure
-    volumes:
-      - type: bind
-        source: ./fleet-server/config/elastic-agent.yml
-        target: /usr/share/elastic-agent/elastic-agent.yml
-        read_only: true
-      - type: volume
-        source: certs
-        target: /usr/share/elastic-agent/certs
-        read_only: true
-    ports:
-      - ${FLEET_SERVER_PORT}:8220
-    environment:
-      - FLEET_SERVER_ENABLE=1
-      - FLEET_SERVER_ELASTICSEARCH_HOST=https://es01:9200
-      - FLEET_SERVER_ELASTICSEARCH_USERNAME=elastic
-      - FLEET_SERVER_ELASTICSEARCH_PASSWORD=${ELASTIC_PASSWORD} 
-      - FLEET_SERVER_ELASTICSEARCH_CA=/usr/share/elastic-agent/certs/ca/ca.crt
-      - FLEET_SERVER_POLICY_ID=fleet_server_policy
-      - FLEET_SERVER_CERT=/usr/share/elastic-agent/certs/fleet-server/fleet-server.crt
-      - FLEET_SERVER_CERT_KEY=/usr/share/elastic-agent/certs/fleet-server/fleet-server.key
-      - FLEET_CA=/usr/share/elastic-agent/certs/ca/ca.crt
-      - FLEET_URL=https://localhost:8220
-      - FLEET_ENROLL=1
-    mem_limit: ${AGENT_MEM_LIMIT}
-    networks:
-      - default
-    healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "curl -s --cacert certs/ca/ca.crt -X GET https://localhost:8220/api/status | grep -c 'HEALTHY'",
-        ]
-      interval: 10s
-      timeout: 10s
-      retries: 120
-
-  apm-server:
-    depends_on:
-      es01:
-        condition: service_healthy
-      es02:
-        condition: service_healthy
-      es03:
-        condition: service_healthy
-      kibana:
-        condition: service_healthy
-      fleet-server:
-        condition: service_healthy
-    image: docker.elastic.co/beats/elastic-agent:${STACK_VERSION}
-    container_name: apm-server
-    user: elastic-agent
-    restart: on-failure
-    volumes:
-      - type: bind
-        source: ./apm-server/config/elastic-agent.yml
-        target: /usr/share/elastic-agent/elastic-agent.yml
-        read_only: true
-      - type: volume
-        source: certs
-        target: /usr/share/elastic-agent/certs
-        read_only: true
-    ports:
-      - ${APM_SERVER_PORT}:8200
-    environment:
-      - FLEET_ENROLL=1
-      - FLEET_URL=https://fleet-server:${FLEET_SERVER_PORT}
-      - FLEET_CA=/usr/share/elastic-agent/certs/ca/ca.crt
-      - FLEET_TOKEN_POLICY_NAME=APM Server Policy
-    mem_limit: ${AGENT_MEM_LIMIT}
-    networks:
-      - default
-    healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "curl -s --cacert certs/ca/ca.crt -X GET https://localhost:8200/ | grep -c '\"publish_ready\": true'",
-        ]
-      interval: 10s
-      timeout: 10s
-      retries: 120
-
-  filebeat:
-    depends_on:
-      es01:
-        condition: service_healthy
-      es02:
-        condition: service_healthy
-      es03:
-        condition: service_healthy
-    image: docker.elastic.co/beats/filebeat:${STACK_VERSION}
-    container_name: filebeat
-    user: root
-    restart: on-failure
-    volumes:
-      - type: bind
-        source: ./filebeat/config/filebeat.yml
-        target: /usr/share/filebeat/filebeat.yml
-        read_only: true
-      - type: bind
-        source: ./filebeat/config/inputs.d
-        target: /usr/share/filebeat/inputs.d
-        read_only: true
-      - type: bind
-        source: ./filebeat/config/modules.d
-        target: /usr/share/filebeat/modules.d
-        read_only: true
-      - type: volume
-        source: certs
-        target: /usr/share/filebeat/certs
-        read_only: true
-      - "/var/run/docker.sock:/var/run/docker.sock:ro"
-      - "/var/lib/docker/containers:/var/lib/docker/containers:ro"
-      - "/var/log:/hostfs/var/log:ro"
-      - "/home/ingrid:/hostfs/home/ingrid:ro"
-    command: filebeat -e -strict.perms=false
-    mem_limit: ${AGENT_MEM_LIMIT}
-    networks:
-      - default
-
-  metricbeat:
-    depends_on:
-      es01:
-        condition: service_healthy
-      es02:
-        condition: service_healthy
-      es03:
-        condition: service_healthy
-    image: docker.elastic.co/beats/metricbeat:${STACK_VERSION}
-    container_name: metricbeat
-    user: root
-    restart: on-failure
-    volumes:
-      - type: bind
-        source: ./metricbeat/config/metricbeat.yml
-        target: /usr/share/metricbeat/metricbeat.yml
-        read_only: true
-      - type: bind
-        source: ./metricbeat/config/modules.d
-        target: /usr/share/metricbeat/modules.d
-        read_only: true
-      - type: volume
-        source: certs
-        target: /usr/share/metricbeat/certs
-        read_only: true
-      - /proc:/hostfs/proc:ro
-      - /sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro
-      - /:/hostfs:ro
-      - /var/run/docker.sock:/var/run/docker.sock
-      - /run/systemd/private:/run/systemd/private:ro
-      - /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket:ro
-    command: metricbeat -e -strict.perms=false
-    mem_limit: ${AGENT_MEM_LIMIT}
-    networks:
-      - default
-    extra_hosts:
-    - "host.docker.internal:host-gateway"
-
-  heartbeat:
-    depends_on:
-      es01:
-        condition: service_healthy
-      es02:
-        condition: service_healthy
-      es03:
-        condition: service_healthy
-    image: docker.elastic.co/beats/heartbeat:${STACK_VERSION}
-    container_name: heartbeat
-    restart: on-failure
-    volumes:
-      - type: bind
-        source: ./heartbeat/config/heartbeat.yml
-        target: /usr/share/heartbeat/heartbeat.yml
-        read_only: true
-      - type: bind
-        source: ./heartbeat/config/monitors.d
-        target: /usr/share/heartbeat/monitors.d
-        read_only: true
-      - type: volume
-        source: certs
-        target: /usr/share/heartbeat/certs
-        read_only: true
-    command: heartbeat -e -strict.perms=false
-    cap_add:
-      - NET_RAW
-    mem_limit: ${AGENT_MEM_LIMIT}
-    networks:
-      - default
-    extra_hosts:
-    - "host.docker.internal:host-gateway"
-
-  auditbeat:
-    depends_on:
-      es01:
-        condition: service_healthy
-      es02:
-        condition: service_healthy
-      es03:
-        condition: service_healthy
-    image: docker.elastic.co/beats/auditbeat:${STACK_VERSION}
-    container_name: auditbeat
-    user: root
-    restart: on-failure
-    volumes:
-      - type: bind
-        source: ./auditbeat/config/auditbeat.yml
-        target: /usr/share/auditbeat/auditbeat.yml
-        read_only: true
-      - type: bind
-        source: ./auditbeat/config/modules.d
-        target: /usr/share/auditbeat/modules.d
-        read_only: true
-      - type: volume
-        source: certs
-        target: /usr/share/auditbeat/certs
-        read_only: true
-    command: auditbeat -e -strict.perms=false
-    cap_add:
-      - AUDIT_CONTROL
-      - AUDIT_READ
-    pid: host
-    mem_limit: ${AGENT_MEM_LIMIT}
-    networks:
-      - default
-
-  packetbeat:
-    depends_on:
-      es01:
-        condition: service_healthy
-      es02:
-        condition: service_healthy
-      es03:
-        condition: service_healthy
-    image: docker.elastic.co/beats/packetbeat:${STACK_VERSION}
-    container_name: packetbeat
-    #user: root
-    restart: on-failure
-    volumes:
-      - type: bind
-        source: ./packetbeat/config/packetbeat.yml
-        target: /usr/share/packetbeat/packetbeat.yml
-        read_only: true
-      - type: volume
-        source: certs
-        target: /usr/share/packetbeat/certs
-        read_only: true
-    command: packetbeat -e -strict.perms=false
-    cap_add:
-      - NET_ADMIN
-      - NET_RAW
-    pid: host
-    mem_limit: ${AGENT_MEM_LIMIT}
-    networks:
-      - default
-
-  logstash:
-    depends_on:
-      es01:
-        condition: service_healthy
-      es02:
-        condition: service_healthy
-      es03:
-        condition: service_healthy
-    image: docker.elastic.co/logstash/logstash:${STACK_VERSION}
-    container_name: logstash
-    user: root
-    restart: on-failure
-    volumes:
-      - type: bind
-        source: ./logstash/config/logstash.yml
-        target: /usr/share/logstash/config/logstash.yml
-        read_only: true
-      - type: bind
-        source: ./logstash/config/pipelines.yml
-        target: /usr/share/logstash/config/pipelines.yml
-        read_only: true
-      - type: bind
-        source: ./logstash/pipeline
-        target: /usr/share/logstash/pipeline
-        read_only: true
-      - type: volume
-        source: logstash_data
-        target: /usr/share/logstash/data
-      - type: volume
-        source: certs
-        target: /usr/share/logstash/certs
-        read_only: true
-    ports:
-      - ${LS_PORT}:9600
-      - "5000:5000"
-      - "5044:5044"
-    environment:
-      LS_JAVA_OPTS: "${LS_JAVA_OPTS}"
-    mem_limit: ${MEM_LIMIT}
-    networks:
-      - default
-    healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "curl -s -I http://localhost:9600 | grep -q 'HTTP/1.1 200 OK'",
         ]
       interval: 10s
       timeout: 10s
@@ -617,9 +281,6 @@ volumes:
   certs:
     name: certs
     driver: local
-  prometheus_data:
-    name: prometheus_data
-    driver: local
   es01_data:
     name: es01_data
     driver: local
@@ -631,7 +292,4 @@ volumes:
     driver: local
   kibana_data:
     name: kibana_data
-    driver: local
-  logstash_data:
-    name: logstash_data
     driver: local

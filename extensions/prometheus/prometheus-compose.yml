@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+
+  prometheus:
+    image: prom/prometheus:${PROM_VERSION}
+    container_name: prometheus
+    restart: on-failure
+    volumes:
+      - type: bind
+        source: ./extensions/prometheus/config/prometheus.yml
+        target: /etc/prometheus/prometheus.yml
+        read_only: true
+      - type: volume
+        source: prometheus_data
+        target: /usr/share/prometheus/data
+    ports:
+      - ${PROMETHEUS_PORT}:9090
+    mem_limit: ${PROM_MEM_LIMIT}
+    networks:
+      - default
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -s -I http://localhost:9090 | grep -q 'HTTP/1.1 200 OK'",
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 120
+
+volumes:
+  prometheus_data:
+    name: prometheus_data
+    driver: local

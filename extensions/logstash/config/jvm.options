@@ -1,0 +1,4 @@
+## JVM configuration
+
+#-Xmx1g
+#-Xmx2g

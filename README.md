@@ -5,26 +5,13 @@ Run the latest version of the [Elastic stack][elk-stack], [Prometheus][prometheu
 It gives you the ability to analyze any data set by using the searching/aggregation capabilities of Elasticsearch and
 the visualization power of Kibana.
 
-> The Docker images backing this stack include [Stack Features][stack-features] (formerly X-Pack)
-with [paid features][paid-features] enabled by default (see [How to disable paid
-features](#how-to-disable-paid-features) to disable them). The [trial license][trial-license] is valid for 30 days.
-
-Based on the official Docker images from Elastic:
-
-* [Elasticsearch](https://github.com/elastic/elasticsearch)
-* [Logstash](https://github.com/elastic/logstash)
-* [Kibana](https://github.com/elastic/kibana)
-* [Beats](https://github.com/elastic/beats)
-* [Prometheus](https://github.com/prometheus)
-
 ## Contents
 
 - [Elastic stack (ELK) on Docker](#elastic-stack-elk-on-docker)
   - [Contents](#contents)
   - [Requirements](#requirements)
-    - [Host setup](#host-setup)
+    - [Host setup (Tested on Linux only)](#host-setup-tested-on-linux-only)
       - [Linux](#linux)
-      - [Windows](#windows)
   - [Usage](#usage)
     - [Bringing up the stack](#bringing-up-the-stack)
     - [Cleanup](#cleanup)
@@ -36,7 +23,6 @@ Based on the official Docker images from Elastic:
   - [Configuration](#configuration)
     - [How to configure Elasticsearch](#how-to-configure-elasticsearch)
     - [How to configure Kibana](#how-to-configure-kibana)
-    - [How to configure Logstash](#how-to-configure-logstash)
     - [How to configure Filebeat](#how-to-configure-filebeat)
     - [How to configure Metricbeat](#how-to-configure-metricbeat)
     - [How to disable paid features](#how-to-disable-paid-features)
@@ -48,27 +34,18 @@ Based on the official Docker images from Elastic:
 
 ## Requirements
 
-### Host setup
+### Host setup (Tested on Linux only)
 
 #### Linux
 
 * [Docker Engine](https://docs.docker.com/engine/install/)
 * [Docker Compose](https://docs.docker.com/compose/)
 
-#### Windows
-
-* [Docker Desktop](https://docs.docker.com/desktop/install/windows-install/)
-* [Use the WSL 2 based engine](https://docs.docker.com/desktop/windows/wsl/)
-
-> Especially on Linux, make sure your user has the [required permissions][linux-postinstall] to
-> interact with the Docker daemon.
+Kake sure your user has the [required permissions][linux-postinstall] to interact with the Docker daemon.
 
 By default, the stack exposes the following ports:
-* 5000: Logstash TCP input
-* 5044: Logstash Beats input
 * 9200: Elasticsearch HTTP (first node only)
 * 5601: Kibana
-* 9090: Prometheus
 
 > This docker compose is based on the official one provided by Elastic and available on Elasticsearch Guide [Install Elasticsearch with Docker][elasticsearch-docker] for development purpose. For production setups, we recommend users to set up their host according to the instructions from the Elasticsearch documentation: [Important System Configuration][es-sys-config].
 
@@ -88,7 +65,7 @@ If you are starting the stack for the very **first time**, please read the secti
 
 ### Cleanup
 
-Elasticsearch, Kibana, Logstash and Prometheus data are persisted inside volumes by default.
+Elasticsearch, Kibana, ... data are persisted inside volumes by default.
 
 In order to entirely shutdown the stack and remove all persisted data, use the following Docker Compose command:
 
@@ -99,8 +76,6 @@ $ docker-compose down -v
 ## Initial setup
 
 ### Setting up user authentication
-
-> Refer to [How to disable paid features](#how-to-disable-paid-features) to disable authentication.
 
 The stack is pre-configured with the following **privileged** bootstrap user:
 
@@ -228,16 +203,6 @@ It is also possible to map the entire `config` directory instead of a single fil
 Please refer to the following documentation page for more details about how to configure Kibana inside Docker
 containers: [Running Kibana on Docker][kbn-docker].
 
-### How to configure Logstash
-
-The Logstash configuration is stored in [`logstash/config/logstash.yml`][config-ls] and pipelines configuration is done in [`logstash/config/pipelines.yml`][config-pl].
-
-It is also possible to map the entire `config` directory instead of a single file, however you must be aware that
-Logstash will be expecting a [`log4j2.properties`][log4j-props] file for its own logging.
-
-Please refer to the following documentation page for more details about how to configure Logstash inside Docker
-containers: [Configuring Logstash for Docker][ls-docker].
-
 ### How to configure Filebeat
 
 The Filebeat configuration is stored in [`filebeat/config/filebeat.yml`][config-fb].
@@ -314,8 +279,6 @@ $ docker-compose up
 
 [config-es]: ./elasticsearch/config/elasticsearch.yml
 [config-kbn]: ./kibana/config/kibana.yml
-[config-ls]: ./logstash/config/logstash.yml
-[config-pl]: ./logstash/config/pipelines.yml
 [config-mb]: ./metricbeat/config/metricbeat.yml
 [config-fb]: ./filebeat/config/filebeat.yml
 
@@ -327,3 +290,9 @@ $ docker-compose up
 [esuser]: https://github.com/elastic/elasticsearch/blob/7.6/distribution/docker/src/docker/Dockerfile#L23-L24
 
 [upgrade]: https://www.elastic.co/guide/en/elasticsearch/reference/current/setup-upgrade.html
+
+
+
+
+
+docker compose -f docker-compose.yml -f extensions/logstash/logstash-compose.yml -f extensions/prometheus/prometheus-compose.yml -f extensions/fleet-server/fleet-server-compose.yml -f extensions/apm-server/apm-server-compose.yml -f extensions/beats/beats-compose.yml -f extensions/enterprise-search/enterprise-search-compose.yml up -d

@@ -1,0 +1,185 @@
+version: '3.8'
+
+services:
+
+  filebeat:
+    depends_on:
+      es01:
+        condition: service_healthy
+      es02:
+        condition: service_healthy
+      es03:
+        condition: service_healthy
+    image: docker.elastic.co/beats/filebeat:${ELASTIC_STACK_VERSION}
+    container_name: filebeat
+    user: root
+    restart: on-failure
+    volumes:
+      - type: bind
+        source: ./extensions/beats/filebeat/config/filebeat.yml
+        target: /usr/share/filebeat/filebeat.yml
+        read_only: true
+      - type: bind
+        source: ./extensions/beats/filebeat/config/inputs.d
+        target: /usr/share/filebeat/inputs.d
+        read_only: true
+      - type: bind
+        source: ./extensions/beats/filebeat/config/modules.d
+        target: /usr/share/filebeat/modules.d
+        read_only: true
+      - type: volume
+        source: certs
+        target: /usr/share/filebeat/certs
+        read_only: true
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "/var/lib/docker/containers:/var/lib/docker/containers:ro"
+      - "/var/log:/hostfs/var/log:ro"
+      - "/home/ingrid:/hostfs/home/ingrid:ro"
+    command: filebeat -e -strict.perms=false
+    environment:
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+    mem_limit: ${BEATS_MEM_LIMIT}
+    networks:
+      - default
+
+  metricbeat:
+    depends_on:
+      es01:
+        condition: service_healthy
+      es02:
+        condition: service_healthy
+      es03:
+        condition: service_healthy
+    image: docker.elastic.co/beats/metricbeat:${ELASTIC_STACK_VERSION}
+    container_name: metricbeat
+    user: root
+    restart: on-failure
+    volumes:
+      - type: bind
+        source: ./extensions/beats/metricbeat/config/metricbeat.yml
+        target: /usr/share/metricbeat/metricbeat.yml
+        read_only: true
+      - type: bind
+        source: ./extensions/beats/metricbeat/config/modules.d
+        target: /usr/share/metricbeat/modules.d
+        read_only: true
+      - type: volume
+        source: certs
+        target: /usr/share/metricbeat/certs
+        read_only: true
+      - /proc:/hostfs/proc:ro
+      - /sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro
+      - /:/hostfs:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /run/systemd/private:/run/systemd/private:ro
+      - /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket:ro
+    command: metricbeat -e -strict.perms=false
+    environment:
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+    mem_limit: ${BEATS_MEM_LIMIT}
+    networks:
+      - default
+    extra_hosts:
+    - "host.docker.internal:host-gateway"
+
+  heartbeat:
+    depends_on:
+      es01:
+        condition: service_healthy
+      es02:
+        condition: service_healthy
+      es03:
+        condition: service_healthy
+    image: docker.elastic.co/beats/heartbeat:${ELASTIC_STACK_VERSION}
+    container_name: heartbeat
+    restart: on-failure
+    volumes:
+      - type: bind
+        source: ./extensions/beats/heartbeat/config/heartbeat.yml
+        target: /usr/share/heartbeat/heartbeat.yml
+        read_only: true
+      - type: bind
+        source: ./extensions/beats/heartbeat/config/monitors.d
+        target: /usr/share/heartbeat/monitors.d
+        read_only: true
+      - type: volume
+        source: certs
+        target: /usr/share/heartbeat/certs
+        read_only: true
+    command: heartbeat -e -strict.perms=false
+    cap_add:
+      - NET_RAW
+    environment:
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+    mem_limit: ${BEATS_MEM_LIMIT}
+    networks:
+      - default
+    extra_hosts:
+    - "host.docker.internal:host-gateway"
+
+  auditbeat:
+    depends_on:
+      es01:
+        condition: service_healthy
+      es02:
+        condition: service_healthy
+      es03:
+        condition: service_healthy
+    image: docker.elastic.co/beats/auditbeat:${ELASTIC_STACK_VERSION}
+    container_name: auditbeat
+    user: root
+    restart: on-failure
+    volumes:
+      - type: bind
+        source: ./extensions/beats/auditbeat/config/auditbeat.yml
+        target: /usr/share/auditbeat/auditbeat.yml
+        read_only: true
+      - type: bind
+        source: ./extensions/beats/auditbeat/config/modules.d
+        target: /usr/share/auditbeat/modules.d
+        read_only: true
+      - type: volume
+        source: certs
+        target: /usr/share/auditbeat/certs
+        read_only: true
+    command: auditbeat -e -strict.perms=false
+    cap_add:
+      - AUDIT_CONTROL
+      - AUDIT_READ
+    pid: host
+    environment:
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+    mem_limit: ${BEATS_MEM_LIMIT}
+    networks:
+      - default
+
+  packetbeat:
+    depends_on:
+      es01:
+        condition: service_healthy
+      es02:
+        condition: service_healthy
+      es03:
+        condition: service_healthy
+    image: docker.elastic.co/beats/packetbeat:${ELASTIC_STACK_VERSION}
+    container_name: packetbeat
+    restart: on-failure
+    volumes:
+      - type: bind
+        source: ./extensions/beats/packetbeat/config/packetbeat.yml
+        target: /usr/share/packetbeat/packetbeat.yml
+        read_only: true
+      - type: volume
+        source: certs
+        target: /usr/share/packetbeat/certs
+        read_only: true
+    command: packetbeat -e -strict.perms=false
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    pid: host
+    environment:
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+    mem_limit: ${BEATS_MEM_LIMIT}
+    networks:
+      - default

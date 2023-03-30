@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+
+  logstash:
+    depends_on:
+      es01:
+        condition: service_healthy
+      es02:
+        condition: service_healthy
+      es03:
+        condition: service_healthy
+    image: docker.elastic.co/logstash/logstash:${ELASTIC_STACK_VERSION}
+    container_name: logstash
+    user: root
+    restart: on-failure
+    volumes:
+      - type: bind
+        source: ./extensions/logstash/config/logstash.yml
+        target: /usr/share/logstash/config/logstash.yml
+        read_only: true
+      - type: bind
+        source: ./extensions/logstash/config/pipelines.yml
+        target: /usr/share/logstash/config/pipelines.yml
+        read_only: true
+      - type: bind
+        source: ./extensions/logstash/config/jvm.options
+        target: /usr/share/logstash/config/jvm.options
+        read_only: true
+      - type: bind
+        source: ./extensions/logstash/pipeline
+        target: /usr/share/logstash/pipeline
+        read_only: true
+      - type: volume
+        source: logstash_data
+        target: /usr/share/logstash/data
+      - type: volume
+        source: certs
+        target: /usr/share/logstash/certs
+        read_only: true
+    ports:
+      - ${LS_API_PORT}:9600
+      - ${LS_TCP_INPUT_PORT}:5000
+      - ${LS_BEATS_INPUT_PORT}:5044
+    environment:
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - LS_JAVA_OPTS=${LS_JAVA_OPTS}
+    mem_limit: ${LS_MEM_LIMIT}
+    networks:
+      - default
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -s -I http://localhost:9600 | grep -q 'HTTP/1.1 200 OK'",
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 120
+
+volumes:
+  logstash_data:
+    name: logstash_data
+    driver: local

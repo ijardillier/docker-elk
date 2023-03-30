@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+
+  apm-server:
+    depends_on:
+      fleet-server:
+        condition: service_healthy
+    image: docker.elastic.co/beats/elastic-agent:${ELASTIC_STACK_VERSION}
+    container_name: apm-server
+    user: elastic-agent
+    restart: on-failure
+    volumes:
+      - type: bind
+        source: ./extensions/apm-server/config/elastic-agent.yml
+        target: /usr/share/elastic-agent/elastic-agent.yml
+        read_only: true
+      - type: volume
+        source: certs
+        target: /usr/share/elastic-agent/certs
+        read_only: true
+    ports:
+      - ${APM_SERVER_PORT}:8200
+    environment:
+      - FLEET_ENROLL=1
+      - FLEET_URL=https://fleet-server:${FLEET_SERVER_PORT}
+      - FLEET_CA=/usr/share/elastic-agent/certs/ca/ca.crt
+      - FLEET_TOKEN_POLICY_NAME=APM Server Policy
+    mem_limit: ${APM_SERVER_MEM_LIMIT}
+    networks:
+      - default
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -s --cacert certs/ca/ca.crt -X GET https://localhost:8200/ | grep -c '\"publish_ready\": true'",
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 120
