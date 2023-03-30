@@ -131,7 +131,7 @@ Now that the stack is running, you can load the sample data provided by your Kib
 
 When Kibana launches for the first time, it is not configured with any data view.
 
-> You need to configure each needed data view.s in order to discover data.
+> You need to configure each needed data view in order to discover data.
 
 ## Configuration
 
