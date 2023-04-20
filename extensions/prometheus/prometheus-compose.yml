@@ -19,15 +19,15 @@ services:
     mem_limit: ${PROM_MEM_LIMIT}
     networks:
       - default
-    healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "curl -s -I http://localhost:9090 | grep -q 'HTTP/1.1 200 OK'",
-        ]
-      interval: 10s
-      timeout: 10s
-      retries: 120
+    # healthcheck:
+    #   test:
+    #     [
+    #       "CMD-SHELL",
+    #       "curl -s -I http://localhost:9090 | grep -q 'HTTP/1.1 200 OK'",
+    #     ]
+    #   interval: 10s
+    #   timeout: 10s
+    #   retries: 120
 
 volumes:
   prometheus_data:

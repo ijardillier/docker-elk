@@ -6,7 +6,7 @@
     - json
   period: 10s
   hosts: ["host.docker.internal:8080"]
-  namespace: "aspnet_healthchecks"
+  namespace: "healthchecks"
   path: "/hc"
   #body: ""
   #method: "GET"

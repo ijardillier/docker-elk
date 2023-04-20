@@ -76,6 +76,7 @@ services:
     command: metricbeat -e -strict.perms=false
     environment:
       - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - REMOTE_MONITORING_USER_PASSWORD=${REMOTE_MONITORING_USER_PASSWORD}
     mem_limit: ${BEATS_MEM_LIMIT}
     networks:
       - default
