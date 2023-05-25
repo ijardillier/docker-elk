@@ -5,7 +5,7 @@ Run the latest version of the [Elastic stack][elk-stack], [Prometheus][prometheu
 It gives you the ability to analyze any data set by using the searching/aggregation capabilities of Elasticsearch and
 the visualization power of Kibana.
 
-With this project, you will be able to launch a complete Elastic stac:
+With this project, you will be able to launch a complete Elastic stack:
 
 - 3 Elasticsearch nodes
 - Kibana
