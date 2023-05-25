@@ -5,6 +5,18 @@ Run the latest version of the [Elastic stack][elk-stack], [Prometheus][prometheu
 It gives you the ability to analyze any data set by using the searching/aggregation capabilities of Elasticsearch and
 the visualization power of Kibana.
 
+With this project, you will be able to launch a complete Elastic stac:
+
+- 3 Elasticsearch nodes
+- Kibana
+- Extensions: 
+  - Logstash
+  - On instance of each beat agent: filebeat, metricbeat, heartbeat, auditbeat, packetbeat
+  - Fleet server
+  - APM server
+  - Enterprise Search
+  - Prometheus
+
 ## Contents
 
 - [Elastic stack (ELK) on Docker](#elastic-stack-elk-on-docker)
