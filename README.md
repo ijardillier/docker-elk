@@ -8,7 +8,7 @@ the visualization power of Kibana.
 With this project, you will be able to launch a complete Elastic stack:
 
 - 3 Elasticsearch nodes
-- Kibana
+- 1 Kibana instance
 - Extensions: 
   - Logstash
   - On instance of each beat agent: filebeat, metricbeat, heartbeat, auditbeat, packetbeat
