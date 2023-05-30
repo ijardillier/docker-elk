@@ -110,7 +110,7 @@ xpack.fleet.agentPolicies:
     description: Fleet Server policy owned by Kibana # Text description of this policy.
     namespace: default # String identifying this policy’s namespace.
     monitoring_enabled: ['logs', 'metrics'] # List of keywords that specify the monitoring data to collect.
-    is_managed: true # If true, this policy is not editable by the user and can only be changed by updating the Kibana config.
+    is_managed: false # If true, this policy is not editable by the user and can only be changed by updating the Kibana config.
     is_default_fleet_server: true # If true, this policy is the default Fleet Server agent policy.
     package_policies: # List of integration policies to add to this policy.
       - name: system-1
