@@ -185,11 +185,11 @@ xpack.fleet.agentPolicies:
 # List of outputs that are configured when the Fleet app starts.
 xpack.fleet.outputs:
   - id: fleet-default-output
-    name: Defaults
+    name: Default output
     type: elasticsearch
     hosts: ["https://es01:9200","https://es02:9200","https://es03:9200"]
     is_default: true
     is_default_monitoring: true
     config:
-      ssl.certificate_authorities: [ "/usr/share/elastic-agent/certs/ca/ca.crt" ]
+      ssl.certificate_authorities: ["/usr/share/elastic-agent/certs/ca/ca.crt"]
       
