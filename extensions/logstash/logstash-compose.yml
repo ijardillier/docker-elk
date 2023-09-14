@@ -31,6 +31,10 @@ services:
         source: ./extensions/logstash/pipeline
         target: /usr/share/logstash/pipeline
         read_only: true
+      - type: bind
+        source: ./extensions/logstash/script
+        target: /usr/share/logstash/script
+        read_only: true
       - type: volume
         source: logstash_data
         target: /usr/share/logstash/data
@@ -57,6 +61,15 @@ services:
       interval: 10s
       timeout: 10s
       retries: 120
+
+  memcached:
+    image: memcached:alpine
+    container_name: memcached
+    restart: on-failure
+    ports:
+    - "11211:11211"
+    networks:
+      - default
 
 volumes:
   logstash_data:
