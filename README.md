@@ -1,6 +1,6 @@
 # Elastic stack (ELK) on Docker
 
-Run the latest version of the [Elastic stack][elk-stack], [Prometheus][prometheus] with Docker and Docker Compose.
+Run the latest version of the [Elastic stack][elk-stack] with Docker and Docker Compose.
 
 It gives you the ability to analyze any data set by using the searching/aggregation capabilities of Elasticsearch and
 the visualization power of Kibana.
@@ -12,10 +12,8 @@ With this project, you will be able to launch a complete Elastic stack:
 - Extensions: 
   - Logstash
   - On instance of each beat agent: filebeat, metricbeat, heartbeat, auditbeat, packetbeat
-  - Fleet server
-  - APM server
+  - Fleet server / APM server
   - Enterprise Search
-  - Prometheus
 
 ## Contents
 
@@ -76,7 +74,7 @@ You can find extension documentation in dedicated folder.
 To launch the complete stack will all extensions:
 
 ```console
-$ docker compose -f docker-compose.yml -f extensions/logstash/logstash-compose.yml -f extensions/prometheus/prometheus-compose.yml -f extensions/fleet-server/fleet-server-compose.yml -f extensions/apm-server/apm-server-compose.yml -f extensions/beats/beats-compose.yml -f extensions/enterprise-search/enterprise-search-compose.yml up -d
+$ docker compose -f docker-compose.yml -f extensions/logstash/logstash-compose.yml -f extensions/fleet-server/fleet-server-compose.yml -f extensions/apm-server/apm-server-compose.yml -f extensions/beats/beats-compose.yml -f extensions/enterprise-search/enterprise-search-compose.yml up -d
 ```
 
 ### Cleanup
@@ -181,7 +179,6 @@ $ docker-compose up
 > Always pay attention to the [upgrade instructions][upgrade] for each individual component before performing a stack upgrade.
 
 [elk-stack]: https://www.elastic.co/elk-stack
-[prometheus]: https://prometheus.io
 
 [linux-postinstall]: https://docs.docker.com/install/linux/linux-postinstall/
 

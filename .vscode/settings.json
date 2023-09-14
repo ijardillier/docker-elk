@@ -1,9 +1,0 @@
-{
-    "yaml.schemas": {
-        "file:///home/ingrid/.vscode/extensions/docsmsft.docs-yaml-0.2.9/out/yaml-support/toc.schema.json": [
-            "/toc\\.yml/i",
-            "file:///home/ingrid/Work/sources/github/ijardillier/docker-elk/metricbeat/config/modules.d/prometheus.yml"
-        ],
-        "https://raw.githubusercontent.com/compose-spec/compose-spec/master/schema/compose-spec.json": "file:///home/ingrid/Work/sources/github/ijardillier/docker-elk/extensions/prometheus/prometheus.yml"
-    }
-}
