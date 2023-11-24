@@ -32,3 +32,8 @@ You can change them in .env file.
 ## Documentation
 
 [Fleet server Reference](https://www.elastic.co/guide/en/fleet/current/fleet-server.html)
+
+
+## Install agent
+
+./elastic-agent install --url=https://fleet-server:8220 --enrollment-token=<given_token> --certificate-authorities=/usr/share/elastic-agent/certs/ca/ca.crt
