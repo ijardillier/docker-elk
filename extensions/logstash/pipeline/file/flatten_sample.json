@@ -1,0 +1,48 @@
+{
+    "firstname": "Pierre",
+    "surname": "Curie",
+    "gender": "male",
+    "prizes": [
+        {
+            "year": "1903",
+            "category": "physics"
+        }
+    ]
+},
+{
+    "firstname": "Marie",
+    "surname": "Curie",
+    "gender": "female",
+    "prizes": [
+        {
+            "year": "1903",
+            "category": "physics"
+        },
+        {
+            "year": "1911",
+            "category": "chemistry"
+        }
+    ]
+},
+{
+    "firstname": "Frédéric",
+    "surname": "Joliot",
+    "gender": "male",
+    "prizes": [
+        {
+            "year": "1935",
+            "category": "chemistry"
+        }
+    ]
+},
+{
+    "firstname": "Irène",
+    "surname": "Joliot-Curie",
+    "gender": "female",
+    "prizes": [
+        {
+            "year": "1935",
+            "category": "chemistry"
+        }
+    ]
+}

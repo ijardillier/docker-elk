@@ -102,11 +102,11 @@
 #
 #   path.dead_letter_queue:
 
-- pipeline.id: tcp
-  path.config: "pipeline/tcp/*.conf"
-- pipeline.id: beats
-  path.config: "pipeline/beats/*.conf"
-- pipeline.id: dlq
-  pipeline.workers: 1
-  dead_letter_queue.enable: false
-  path.config: "pipeline/dlq/*.conf"
+# - pipeline.id: beats
+#   path.config: "pipeline/beats/*.conf"
+- pipeline.id: file
+  path.config: "pipeline/file/*.conf"
+# - pipeline.id: dlq
+#   pipeline.workers: 1
+#   dead_letter_queue.enable: false
+#   path.config: "pipeline/dlq/*.conf"
