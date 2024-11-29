@@ -1,0 +1,5 @@
+{"id":1,"firstname":"Pierre","surname":"Curie","gender":"male","prize":[{"year":1903,"category":"physics"}]}
+{"id":2,"firstname":"Marie","surname":"Curie","gender":"female","prize":[{"year":1903,"category":"physics"},{"year":"1911","category":"chemistry"}]}
+{"id":3,"firstname":"Frédéric","surname":"Joliot","gender":"male","prize":[{"year":1935,"category":"chemistry"}]}
+{"id":4,"firstname":"Irène","surname":"Joliot-Curie","gender":"female","prize":[{"year":1935,"category":"chemistry"}]}
+{"id":5,"firstname":"Ingrid","surname":"Jardillier","gender":["?", "female"],"prize":[{"year":1935,"category":"chemistry"}]}
