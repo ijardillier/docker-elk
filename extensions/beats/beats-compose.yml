@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
 
   filebeat:
@@ -35,7 +33,7 @@ services:
       - "/var/lib/docker/containers:/var/lib/docker/containers:ro"
       - "/var/log:/hostfs/var/log:ro"
       - "/home/ingrid:/hostfs/home/ingrid:ro"
-    command: filebeat -e -strict.perms=false
+    command: filebeat -e --strict.perms=false
     environment:
       - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
     mem_limit: ${BEATS_MEM_LIMIT}
@@ -73,7 +71,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - /run/systemd/private:/run/systemd/private:ro
       - /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket:ro
-    command: metricbeat -e -strict.perms=false
+    command: metricbeat -e --strict.perms=false
     environment:
       - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
       - REMOTE_MONITORING_USER_PASSWORD=${REMOTE_MONITORING_USER_PASSWORD}
@@ -107,7 +105,7 @@ services:
         source: certs
         target: /usr/share/heartbeat/certs
         read_only: true
-    command: heartbeat -e -strict.perms=false
+    command: heartbeat -e --strict.perms=false
     cap_add:
       - NET_RAW
     environment:
@@ -143,7 +141,7 @@ services:
         source: certs
         target: /usr/share/auditbeat/certs
         read_only: true
-    command: auditbeat -e -strict.perms=false
+    command: auditbeat -e --strict.perms=false
     cap_add:
       - AUDIT_CONTROL
       - AUDIT_READ
@@ -174,7 +172,7 @@ services:
         source: certs
         target: /usr/share/packetbeat/certs
         read_only: true
-    command: packetbeat -e -strict.perms=false
+    command: packetbeat -e --strict.perms=false
     cap_add:
       - NET_ADMIN
       - NET_RAW

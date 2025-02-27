@@ -15,10 +15,11 @@ This sample setup demonstrates how to run `fleet-server` server.
 
 All configuration files are available in the `config/` directory.
 
-You will need to create a link to ca.crt it you want to install elastic agent without Docker on you host machine :
+You will need to create a link to ca.crt it you want to install elastic agent without Docker on you host machine, for example, in the /opt/Elastic path, where the elastic agent will be installed :
 
 ```bash
-$ ln -s /var/lib/docker/volumes/certs/_data/ca/ca.crt /usr/share/elastic-agent/certs/ca/ca.crt
+$ sudo mkdir /opt/Elastic 
+$ sudo ln -s /var/lib/docker/volumes/certs/_data/ca/ca.crt /opt/Elastic/ca.crt 
 ```
 
 ## Exposed ports
@@ -36,4 +37,4 @@ You can change them in .env file.
 
 ## Install agent
 
-./elastic-agent install --url=https://fleet-server:8220 --enrollment-token=<given_token> --certificate-authorities=/usr/share/elastic-agent/certs/ca/ca.crt
+./elastic-agent install --url=https://fleet-server:8220 --enrollment-token=<given_token> --certificate-authorities=/opt/Elastic/ca.crt

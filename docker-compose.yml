@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
 
   setup:
@@ -274,7 +272,7 @@ services:
 
 networks:
   default:
-    name: elk_bridge
+    name: docker_elk_bridge
     driver: bridge
 
 volumes:
