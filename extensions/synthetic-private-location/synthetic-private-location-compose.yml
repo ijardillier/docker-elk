@@ -1,0 +1,40 @@
+services:
+
+  synthetic-private-location:
+    depends_on:
+      fleet-server:
+        condition: service_healthy
+    image: docker.elastic.co/elastic-agent/elastic-agent-complete:${ELASTIC_STACK_VERSION}
+    container_name: synthetic-private-location
+    hostname: synthetic-private-location
+    user: elastic-agent
+    restart: on-failure
+    volumes:
+      - type: bind
+        source: ./extensions/synthetic-private-location/config/elastic-agent.yml
+        target: /usr/share/elastic-agent/elastic-agent.yml
+        read_only: true
+      - type: volume
+        source: certs
+        target: /usr/share/elastic-agent/certs
+        read_only: true
+    cap_add:
+      - NET_RAW
+      - SETUID
+    environment:
+      - FLEET_ENROLL=1
+      - FLEET_URL=https://fleet-server:${FLEET_SERVER_PORT}
+      - FLEET_CA=/usr/share/elastic-agent/certs/ca/ca.crt
+      - FLEET_TOKEN_POLICY_NAME=Synthetic Private Location Policy
+    mem_limit: ${SYNTHETIC_PRIVATE_LOCATION_MEM_LIMIT}
+    networks:
+      - default
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -s --cacert certs/ca/ca.crt -X GET https://localhost:8200/ | grep -c '\"publish_ready\": true'",
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 120

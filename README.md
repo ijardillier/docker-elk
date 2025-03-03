@@ -74,7 +74,7 @@ You can find extension documentation in dedicated folder.
 To launch the complete stack will all extensions:
 
 ```console
-$ docker compose -f docker-compose.yml -f extensions/logstash/logstash-compose.yml -f extensions/fleet-server/fleet-server-compose.yml -f extensions/apm-server/apm-server-compose.yml -f extensions/beats/beats-compose.yml -f extensions/enterprise-search/enterprise-search-compose.yml up -d
+$ docker compose -f docker-compose.yml -f extensions/logstash/logstash-compose.yml -f extensions/fleet-server/fleet-server-compose.yml -f extensions/apm-server/apm-server-compose.yml -f extensions/beats/beats-compose.yml -f extensions/enterprise-search/enterprise-search-compose.yml -f extensions/synthetic-private-location/synthetic-private-location-compose.yml up -d
 ```
 
 ### Cleanup
