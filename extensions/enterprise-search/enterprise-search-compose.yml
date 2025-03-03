@@ -12,6 +12,7 @@ services:
         condition: service_healthy
     image: docker.elastic.co/enterprise-search/enterprise-search:${ELASTIC_STACK_VERSION}
     container_name: enterprise-search
+    hostname: enterprise-search
     restart: on-failure
     volumes:
       - type: bind

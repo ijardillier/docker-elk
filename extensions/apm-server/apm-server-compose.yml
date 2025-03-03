@@ -6,6 +6,7 @@ services:
         condition: service_healthy
     image: docker.elastic.co/beats/elastic-agent:${ELASTIC_STACK_VERSION}
     container_name: apm-server
+    hostname: apm-server
     user: elastic-agent
     restart: on-failure
     volumes:

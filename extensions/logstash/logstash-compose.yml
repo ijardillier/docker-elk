@@ -10,6 +10,7 @@ services:
         condition: service_healthy
     image: docker.elastic.co/logstash/logstash:${ELASTIC_STACK_VERSION}
     container_name: logstash
+    hostname: logstash
     user: root
     restart: on-failure
     volumes:
@@ -63,6 +64,7 @@ services:
   memcached:
     image: memcached:alpine
     container_name: memcached
+    hostname: memcached
     restart: on-failure
     ports:
     - "11211:11211"

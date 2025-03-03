@@ -10,6 +10,7 @@ services:
         condition: service_healthy
     image: docker.elastic.co/beats/filebeat:${ELASTIC_STACK_VERSION}
     container_name: filebeat
+    hostname: filebeat
     user: root
     restart: on-failure
     volumes:
@@ -50,6 +51,7 @@ services:
         condition: service_healthy
     image: docker.elastic.co/beats/metricbeat:${ELASTIC_STACK_VERSION}
     container_name: metricbeat
+    hostname: metricbeat
     user: root
     restart: on-failure
     volumes:
@@ -91,6 +93,7 @@ services:
         condition: service_healthy
     image: docker.elastic.co/beats/heartbeat:${ELASTIC_STACK_VERSION}
     container_name: heartbeat
+    hostname: heartbeat
     restart: on-failure
     volumes:
       - type: bind
@@ -126,6 +129,7 @@ services:
         condition: service_healthy
     image: docker.elastic.co/beats/auditbeat:${ELASTIC_STACK_VERSION}
     container_name: auditbeat
+    hostname: auditbeat
     user: root
     restart: on-failure
     volumes:
@@ -162,6 +166,7 @@ services:
         condition: service_healthy
     image: docker.elastic.co/beats/packetbeat:${ELASTIC_STACK_VERSION}
     container_name: packetbeat
+    hostname: packetbeat
     restart: on-failure
     volumes:
       - type: bind
