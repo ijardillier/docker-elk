@@ -97,6 +97,7 @@ services:
         condition: service_healthy
     image: docker.elastic.co/elasticsearch/elasticsearch:${ELASTIC_STACK_VERSION}
     container_name: es01
+    hostname: es01
     volumes:
       - type: bind
         source: ./elasticsearch/config/elasticsearch.yml
@@ -143,6 +144,7 @@ services:
       - es01
     image: docker.elastic.co/elasticsearch/elasticsearch:${ELASTIC_STACK_VERSION}
     container_name: es02
+    hostname: es02
     volumes:
       - type: bind
         source: ./elasticsearch/config/elasticsearch.yml
@@ -189,6 +191,7 @@ services:
       - es02
     image: docker.elastic.co/elasticsearch/elasticsearch:${ELASTIC_STACK_VERSION}
     container_name: es03
+    hostname: es03
     volumes:
       - type: bind
         source: ./elasticsearch/config/elasticsearch.yml
@@ -240,6 +243,7 @@ services:
         condition: service_healthy
     image: docker.elastic.co/kibana/kibana:${ELASTIC_STACK_VERSION}
     container_name: kibana
+    hostname: kibana
     restart: on-failure
     volumes:
       - type: bind
