@@ -18,6 +18,7 @@ services:
         source: certs
         target: /usr/share/elastic-agent/certs
         read_only: true
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
     cap_add:
       - NET_RAW
       - SETUID
@@ -29,12 +30,12 @@ services:
     mem_limit: ${SYNTHETIC_PRIVATE_LOCATION_MEM_LIMIT}
     networks:
       - default
-    healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "curl -s --cacert certs/ca/ca.crt -X GET https://localhost:8200/ | grep -c '\"publish_ready\": true'",
-        ]
-      interval: 10s
-      timeout: 10s
-      retries: 120
+    # healthcheck:
+    #   test:
+    #     [
+    #       "CMD-SHELL",
+    #       "curl -s --cacert certs/ca/ca.crt -X GET https://localhost:8200/ | grep -c '\"publish_ready\": true'",
+    #     ]
+    #   interval: 10s
+    #   timeout: 10s
+    #   retries: 120

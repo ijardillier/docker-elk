@@ -917,7 +917,7 @@ output.elasticsearch:
     #param2: value2
 
   # Number of workers per Elasticsearch host.
-  worker: 1
+  #worker: 1
 
   # Optional data stream or index name. The default is "packetbeat-%{[agent.version]}".
   # In case you modify this pattern you must update setup.template.name and setup.template.pattern accordingly.
@@ -1060,7 +1060,7 @@ output.logstash:
   hosts: ["logstash:5044"]
 
   # Number of workers per Logstash host.
-  worker: 1
+  #worker: 1
 
   # Set gzip compression level.
   #compression_level: 3

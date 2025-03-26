@@ -348,7 +348,7 @@ output.elasticsearch:
     #param2: value2
 
   # Number of workers per Elasticsearch host.
-  worker: 1
+  #worker: 1
 
   # Optional data stream or index name. The default is "metricbeat-%{[agent.version]}".
   # In case you modify this pattern you must update setup.template.name and setup.template.pattern accordingly.
@@ -1062,7 +1062,7 @@ output.logstash:
 # These settings control loading the sample dashboards to the Kibana index. Loading
 # the dashboards are disabled by default and can be enabled either by setting the
 # options here, or by using the `-setup` CLI flag or the `setup` command.
-setup.dashboards.enabled: false
+setup.dashboards.enabled: true
 
 # The directory from where to read the dashboards. The default is the `kibana`
 # folder in the home path.
@@ -1143,7 +1143,7 @@ setup.template.enabled: true
 # Overwrite existing template
 # Do not enable this option for more than one instance of metricbeat as it might
 # overload your Elasticsearch with too many update requests.
-setup.template.overwrite: false
+setup.template.overwrite: true
 
 # Elasticsearch template settings
 setup.template.settings:
@@ -1183,7 +1183,7 @@ setup.ilm.policy_name: "metricbeat"
 setup.ilm.check_exists: true
 
 # Overwrite the lifecycle policy at startup. The default is false.
-setup.ilm.overwrite: false
+setup.ilm.overwrite: true
 
 # =================================== Kibana ===================================
 
