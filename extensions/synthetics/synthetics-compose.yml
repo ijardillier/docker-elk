@@ -1,0 +1,101 @@
+services:
+
+  synthetic-private-location:
+    depends_on:
+      fleet-server:
+        condition: service_healthy
+    image: docker.elastic.co/elastic-agent/elastic-agent-complete:${ELASTIC_STACK_VERSION}
+    container_name: synthetic-private-location
+    hostname: synthetic-private-location
+    user: elastic-agent
+    restart: on-failure
+    volumes:
+      - type: bind
+        source: ./extensions/synthetics/synthetic-private-location/config/elastic-agent.yml
+        target: /usr/share/elastic-agent/elastic-agent.yml
+        read_only: true
+      - type: volume
+        source: certs
+        target: /usr/share/elastic-agent/certs
+        read_only: true
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    cap_add:
+      - NET_RAW
+      - SETUID
+    environment:
+      - FLEET_ENROLL=1
+      - FLEET_URL=https://fleet-server:${FLEET_SERVER_PORT}
+      - FLEET_CA=/usr/share/elastic-agent/certs/ca/ca.crt
+      - FLEET_TOKEN_POLICY_NAME=Synthetic Private Location Policy
+    mem_limit: ${SYNTHETIC_PRIVATE_LOCATION_MEM_LIMIT}
+    networks:
+      - default
+    # healthcheck:
+    #   test:
+    #     [
+    #       "CMD-SHELL",
+    #       "curl -s --cacert certs/ca/ca.crt -X GET https://localhost:8200/ | grep -c '\"publish_ready\": true'",
+    #     ]
+    #   interval: 10s
+    #   timeout: 10s
+    #   retries: 120
+
+  synthetic-project-monitors:
+    depends_on:
+      synthetic-private-location:
+        condition: service_healthy
+    image: node:lts
+    container_name: synthetic-project-monitors
+    hostname: synthetic-project-monitors
+    restart: on-failure
+    volumes:
+      - type: bind
+        source: ./extensions/synthetics/synthetic-project-monitors/config/
+        target: /opt/synthetic-project-monitors/config
+        read_only: true
+    mem_limit: ${SYNTHETIC_PROJECT_MONITOR_MEM_LIMIT}
+    networks:
+      - default
+
+  synthetic-setup:
+    depends_on:
+      kibana:
+        condition: service_healthy
+    image: curlimages/curl:latest
+    container_name: synthetic-setup
+    hostname: synthetic-setup
+    volumes:
+      - type: bind
+        source: ./extensions/synthetics/synthetic-setup/config/
+        target: /opt/synthetic-setup/config
+        read_only: true
+    command: |
+      sh -c '
+        echo -e "Create Private Location";
+        curl -s -X POST -u "elastic:${ELASTIC_PASSWORD}" -H "Content-Type: application/json" -H "kbn-xsrf: true" http://kibana:5601/api/synthetics/private_locations -d @/opt/synthetic-setup/config/private_location.json
+        echo -e "\nCreate Monitor es01";
+        curl -s -X POST -u "elastic:${ELASTIC_PASSWORD}" -H "Content-Type: application/json" -H "kbn-xsrf: true" http://kibana:5601/api/synthetics/monitors -d @/opt/synthetic-setup/config/monitors-es01.json
+        echo -e "\nCreate Monitor es02";
+        curl -s -X POST -u "elastic:${ELASTIC_PASSWORD}" -H "Content-Type: application/json" -H "kbn-xsrf: true" http://kibana:5601/api/synthetics/monitors -d @/opt/synthetic-setup/config/monitors-es02.json
+        echo -e "\nCreate Monitor es03";
+        curl -s -X POST -u "elastic:${ELASTIC_PASSWORD}" -H "Content-Type: application/json" -H "kbn-xsrf: true" http://kibana:5601/api/synthetics/monitors -d @/opt/synthetic-setup/config/monitors-es03.json
+        echo -e "\nCreate Monitor kibana";
+        curl -s -X POST -u "elastic:${ELASTIC_PASSWORD}" -H "Content-Type: application/json" -H "kbn-xsrf: true" http://kibana:5601/api/synthetics/monitors -d @/opt/synthetic-setup/config/monitors-kibana.json
+        echo -e "\nCreate Monitor filebeat";
+        curl -s -X POST -u "elastic:${ELASTIC_PASSWORD}" -H "Content-Type: application/json" -H "kbn-xsrf: true" http://kibana:5601/api/synthetics/monitors -d @/opt/synthetic-setup/config/monitors-filebeat.json
+        echo -e "\nCreate Monitor metricbeat";
+        curl -s -X POST -u "elastic:${ELASTIC_PASSWORD}" -H "Content-Type: application/json" -H "kbn-xsrf: true" http://kibana:5601/api/synthetics/monitors -d @/opt/synthetic-setup/config/monitors-metricbeat.json
+        echo -e "\nCreate Monitor auditbeat";
+        curl -s -X POST -u "elastic:${ELASTIC_PASSWORD}" -H "Content-Type: application/json" -H "kbn-xsrf: true" http://kibana:5601/api/synthetics/monitors -d @/opt/synthetic-setup/config/monitors-auditbeat.json
+        echo -e "\nCreate Monitor heartbeat";
+        curl -s -X POST -u "elastic:${ELASTIC_PASSWORD}" -H "Content-Type: application/json" -H "kbn-xsrf: true" http://kibana:5601/api/synthetics/monitors -d @/opt/synthetic-setup/config/monitors-heartbeat.json
+        echo -e "\nCreate Monitor packetbeat";
+        curl -s -X POST -u "elastic:${ELASTIC_PASSWORD}" -H "Content-Type: application/json" -H "kbn-xsrf: true" http://kibana:5601/api/synthetics/monitors -d @/opt/synthetic-setup/config/monitors-packetbeat.json
+        echo -e "\nCreate Monitor fleet-server";
+        curl -s -X POST -u "elastic:${ELASTIC_PASSWORD}" -H "Content-Type: application/json" -H "kbn-xsrf: true" http://kibana:5601/api/synthetics/monitors -d @/opt/synthetic-setup/config/monitors-fleet-server.json
+        echo -e "\nCreate Monitor apm-server";
+        curl -s -X POST -u "elastic:${ELASTIC_PASSWORD}" -H "Content-Type: application/json" -H "kbn-xsrf: true" http://kibana:5601/api/synthetics/monitors -d @/opt/synthetic-setup/config/monitors-apm-server.json
+        echo -e "\nOk";
+      '
+    networks:
+      - default

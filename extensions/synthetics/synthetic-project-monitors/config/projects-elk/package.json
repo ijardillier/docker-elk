@@ -1,0 +1,16 @@
+{
+  "name": "projects-elk",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "push": "npx @elastic/synthetics push"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@elastic/synthetics": "^1.18.0"
+  }
+}
