@@ -1,0 +1,25 @@
+{
+    "name": "synthetics-api-key",
+    "role_descriptors": {
+      "uptime_save": {
+        "cluster": [],
+        "indices": [],
+        "applications": [
+          {
+            "application": "kibana-.kibana",
+            "privileges": [
+              "feature_uptime.all"
+            ],
+            "resources": [
+              "*"
+            ]
+          }
+        ],
+        "metadata": {},
+        "run_as": []
+      }
+    },
+    "metadata": {
+      "description": "Created for the Synthetics Agent to be able to communicate with Kibana for generating monitors for projects"
+    }
+}

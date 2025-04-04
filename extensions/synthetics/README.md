@@ -1,12 +1,14 @@
 # Synthetics
 
-## Synthetic private locations
+Synthetics periodically checks the status of your services and applications. Monitor the availability of network endpoints and services using the following types of monitors:
 
-Private locations allow you to run monitors from your own premises. They require an Elastic agent and Agent policy which you can control and maintain via Fleet.
+    - Lightweight HTTP/S, TCP, and ICMP monitors
+    - Browser monitors
 
-## Synthetic project monitors
+This extension provides 3 containers:
 
-Project monitors allow you to create monitors from configuration project.
+    - Private location: allows you to run monitors from your own premises. They require an Elastic agent and Agent policy which you can control and maintain via Fleet.
+    - Setup: initializes agent policy, private location agent and lightweight and project monitors. 
 
 ## Usage
 
@@ -19,8 +21,6 @@ $ docker-compose -f docker-compose.yml -f extensions/synthetics/synthetics-compo
 
 This sample setup demonstrates how to run `synthetic-private-location` agent and how to import monitors using NodeJS `synthetic-project-monitors`.
 
-All configuration files are available in the `config/` directory.
-
 ## Exposed ports
 
 No exposed ports.
@@ -29,7 +29,21 @@ No exposed ports.
 
 [Synthetic Monitoring Reference](https://www.elastic.co/guide/en/observability/current/monitor-uptime-synthetics.html)
 
-## Miscellianous information about project monitors
+### Miscellianous information about lightweight monitors
+
+There are two ways to create lightweight monitors:
+
+    - by using Kibana UI / Synthetic app
+    - by using Kibana Synthetic API
+
+### Miscellianous information about project monitors
+
+There are two ways to create lightweight monitors:
+
+    - by using Kibana UI / Synthetic app
+    - by creating Synthetic NodeJS project and pushing it to Kibana
+
+#### Development environment initalization
 
 - Install NodeJS on Linux: 
 
@@ -52,9 +66,28 @@ $ npx @elastic/synthetics -h
 - Create a project:
 
 ```bash
-$ npx @elastic/synthetics init projects-elk
+$ npx @elastic/synthetics init projects-sample
 ```
 
-TF95RzBwVUI2aFE4ZDMxT2ZhZVI6MUZiVVFqYWdTOUdxX0xWTG1kNDFzQQ==
-export SYNTHETICS_API_KEY=TF95RzBwVUI2aFE4ZDMxT2ZhZVI6MUZiVVFqYWdTOUdxX0xWTG1kNDFzQQ==
-SYNTHETICS_API_KEY=TF95RzBwVUI2aFE4ZDMxT2ZhZVI6MUZiVVFqYWdTOUdxX0xWTG1kNDFzQQ== npm run push
+- Add lightweight and journeys
+
+```ts
+...
+```
+
+- Test journeys:
+
+```bash
+$ npx @elastic/synthetics journeys
+```
+
+You can then push your project to Kibana using the CLI, in this project, it is automatically done by the setup container.
+
+More information on: https://www.elastic.co/guide/en/observability/current/synthetics-command-reference.html#elastic-synthetics-push-command
+
+#### Synthetic Monitoring Recorder
+
+Instead of scripting synthetic tests, you can use the Synthetic Monitoring Recorder to record it and just make some adjustments if needed.
+
+More information on: https://github.com/elastic/synthetics-recorder/blob/main/docs/DOWNLOAD.md
+

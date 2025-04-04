@@ -181,22 +181,6 @@ xpack.fleet.agentPolicies:
         id: elastic_agent-1
         package:
           name: elastic_agent
-  - name: Synthetic Private Location Policy
-    id: synthetic_private_location_policy
-    description: Synthetic Private Location Agent policy owned by Kibana
-    namespace: default
-    monitoring_enabled: ['logs', 'metrics']
-    is_managed: false
-    is_default: false # If true, this policy is the default agent policy.
-    package_policies:
-      - name: system-1 # Name of the integration policy.
-        id: system-1 # Unique ID of the integration policy. The ID may be a number or string.
-        package: # Integration that this policy configures.
-          name: system # Name of the integration associated with this policy.
-      - name: elastic_agent-1
-        id: elastic_agent-1
-        package:
-          name: elastic_agent
 
 # List of outputs that are configured when the Fleet app starts.
 xpack.fleet.outputs:

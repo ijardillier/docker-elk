@@ -20,7 +20,7 @@ export default env => {
      * Project monitors settings
      */
     project: {
-      id: 'projects-elk',
+      id: 'project-sample',
       url: 'http://kibana:5601/',
       space: 'default',
     },

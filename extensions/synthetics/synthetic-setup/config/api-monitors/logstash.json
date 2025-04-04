@@ -1,0 +1,27 @@
+{
+  "type": "http",
+  "name": "logstash",
+  "schedule": {
+      "number": "5",
+      "unit": "m"
+  },
+  "private_locations": ["Dev Machine"],
+  "url": "http://logstash:9600",
+  "ssl": {
+      "verification_mode": "none"
+  },
+  "ipv4": true,
+  "ipv6": false,
+  "response": {
+      "include_body": "on_error",
+      "include_headers": true
+  },
+  "check": {
+      "response": {
+          "status": ["200"]
+      }
+  },
+  "service": {
+    "name": "dev"
+  }
+}

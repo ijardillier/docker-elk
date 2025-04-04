@@ -13,6 +13,7 @@ With this project, you will be able to launch a complete Elastic stack:
   - Logstash
   - On instance of each beat agent: filebeat, metricbeat, heartbeat, auditbeat, packetbeat
   - Fleet server / APM server
+  - Synthetic monitoring
   - Enterprise Search
 
 ## Contents

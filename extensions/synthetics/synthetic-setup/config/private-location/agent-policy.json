@@ -1,0 +1,10 @@
+{
+  "id": "synthetic_private_location_policy",
+  "name": "Synthetic Private Location Policy",
+  "description": "Synthetic private location policy",
+  "namespace": "default",
+  "monitoring_enabled": [
+    "logs",
+    "metrics"
+  ]
+}
