@@ -1,13 +1,13 @@
 # Module: http
 # Docs: https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-module-http.html
 
-- module: http
-  metricsets:
-    - json
-  period: 10s
-  hosts: ["host.docker.internal:8080"]
-  namespace: "healthchecks"
-  path: "/hc"
+# - module: http
+#   metricsets:
+#     - json
+#   period: 10s
+#   hosts: ["host.docker.internal:8080"]
+#   namespace: "healthchecks"
+#   path: "/hc"
   #body: ""
   #method: "GET"
   #username: "user"
