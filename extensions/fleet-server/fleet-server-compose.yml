@@ -10,7 +10,7 @@ services:
         condition: service_healthy
       kibana:
         condition: service_healthy
-    image: docker.elastic.co/beats/elastic-agent:${ELASTIC_STACK_VERSION}
+    image: docker.elastic.co/elastic-agent/elastic-agent:${ELASTIC_STACK_VERSION}
     container_name: fleet-server
     hostname: fleet-server
     user: elastic-agent

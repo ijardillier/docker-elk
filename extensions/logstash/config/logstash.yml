@@ -320,11 +320,3 @@ xpack.management.elasticsearch.password: ${ELASTIC_PASSWORD}
 xpack.management.elasticsearch.ssl.certificate_authority: "/usr/share/logstash/certs/ca/ca.crt"
 xpack.management.logstash.poll_interval: 10s
 xpack.management.pipeline.id: ["tcp", "beats", "dlq"]
-
-# X-Pack GeoIP plugin
-# https://www.elastic.co/guide/en/logstash/current/plugins-filters-geoip.html#plugins-filters-geoip-manage_update
-#xpack.geoip.download.endpoint: "https://geoip.elastic.co/v1/database"
-## Default Logstash configuration from Logstash base image.
-## https://github.com/elastic/logstash/blob/master/docker/data/logstash/config/logstash-full.yml
-#
-http.host: "0.0.0.0"

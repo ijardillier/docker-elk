@@ -4,7 +4,7 @@ services:
     depends_on:
       fleet-server:
         condition: service_healthy
-    image: docker.elastic.co/beats/elastic-agent:${ELASTIC_STACK_VERSION}
+    image: docker.elastic.co/elastic-agent/elastic-agent:${ELASTIC_STACK_VERSION}
     container_name: apm-server
     hostname: apm-server
     user: elastic-agent

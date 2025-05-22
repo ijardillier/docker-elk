@@ -42,9 +42,6 @@ logging.appenders.default:
 # Supported languages are the following: English (default) "en", Chinese "zh-CN", Japanese "ja-JP", French "fr-FR".
 i18n.locale: "fr"
 
-# =============== Enterprise search ===============
-enterpriseSearch.host: 'http://enterprise-search:3002'
-
 # =================== Monitoring ==================
 
 # For Elasticsearch clusters that are running in containers, this setting changes the Node Listing to display
