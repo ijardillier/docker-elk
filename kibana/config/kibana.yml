@@ -189,4 +189,12 @@ xpack.fleet.outputs:
     is_default_monitoring: true
     config:
       ssl.certificate_authorities: ["/usr/share/elastic-agent/certs/ca/ca.crt"]
+  - id: fleet-localhost-output
+    name: Localhost output
+    type: elasticsearch
+    hosts: ["https://localhost:9200","https://localhost:9201","https://localhost:9202"]
+    is_default: false
+    is_default_monitoring: false
+    config:
+      ssl.certificate_authorities: ["/opt/Elastic/ca.crt"]
       
