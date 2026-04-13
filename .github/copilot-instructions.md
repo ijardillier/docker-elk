@@ -32,7 +32,7 @@ Notes: service-specific healthchecks and init steps (certs + user bootstrap) are
 - 3 Elasticsearch nodes (es01, es02, es03) forming a cluster.
 - A `setup` helper container that generates TLS certs and bootstraps built-in user passwords using environment variables from the .env file.
 - Kibana (kibana) connects to the cluster and depends on healthy Elasticsearch nodes.
-- Optional extensions live under `extensions/` and provide additional compose files for Logstash, Beats, Fleet/APM/Synthetics, Enterprise Search.
+- Optional extensions live under `extensions/` and provide additional compose files for Logstash, Beats, Fleet/APM/Synthetics.
 - Persistent volumes: per-node data volumes (es01_data, es02_data, es03_data) and kibana_data; certs stored in a `certs` volume.
 - Configuration files are bind-mounted from the repository: `elasticsearch/config/elasticsearch.yml` and `kibana/config/kibana.yml`.
 
