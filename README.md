@@ -27,6 +27,7 @@ With this project, you will be able to launch a complete Elastic stack:
     - [Monitoring startup](#monitoring-startup)
     - [Bringing up extensions](#bringing-up-extensions)
     - [Cleanup](#cleanup)
+    - [Troubleshooting](#troubleshooting)
   - [Initial setup](#initial-setup)
     - [Setting up user authentication](#setting-up-user-authentication)
     - [Injecting data](#injecting-data)
@@ -166,6 +167,77 @@ In order to entirely shutdown the stack and remove all persisted data, use the f
 ```console
 $ docker-compose down -v
 ```
+
+### Troubleshooting
+
+**Setup container fails or won't generate certificates:**
+- Warning: `No such file or directory: config/certs/ca.zip`
+- Solution: Remove the certs volume and restart:
+  ```console
+  $ docker volume rm certs
+  $ docker-compose up
+  ```
+
+**Elasticsearch nodes won't start or stuck "unhealthy":**
+- Check container logs:
+  ```console
+  $ docker-compose logs es01
+  ```
+- Common causes: insufficient memory, previous data corruption, port conflict
+- Full reset (removes all data):
+  ```console
+  $ docker-compose down -v
+  $ docker-compose up
+  ```
+
+**Kibana can't connect to Elasticsearch:**
+- Verify ES nodes are healthy:
+  ```console
+  $ docker-compose ps
+  ```
+  All three `es0X` containers should show `Up (healthy)`
+- Check Kibana logs:
+  ```console
+  $ docker-compose logs kibana
+  ```
+- If ES is healthy but Kibana still fails, try restarting Kibana:
+  ```console
+  $ docker-compose restart kibana
+  ```
+
+**"Port already in use" error:**
+- Another service is using ports 9200–9202 or 5601
+- Either stop the conflicting service, or change ports in `.env`:
+  ```
+  ES_PORT_01=9200
+  ES_PORT_02=9201
+  ES_PORT_03=9202
+  KIBANA_PORT=5601
+  ```
+- Then restart: `docker-compose up -d`
+
+**"No space left on device" error:**
+- Elasticsearch data volumes are consuming disk space
+- Remove volumes to free space:
+  ```console
+  $ docker-compose down -v
+  ```
+- Or, selectively remove only ES volumes:
+  ```console
+  $ docker volume rm es01_data es02_data es03_data kibana_data
+  ```
+
+**Complete reset (start completely fresh):**
+- Stop all containers and remove all volumes and certs:
+  ```console
+  $ docker-compose down -v
+  $ docker volume rm certs 2>/dev/null
+  $ docker-compose up
+  ```
+
+**Use the Makefile for common tasks:**
+- See available commands: `make help`
+- Example: `make clean` (stop and remove all data), `make health` (check ES cluster status)
 
 ## Initial setup
 
