@@ -1,4 +1,12 @@
-.PHONY: help up down clean logs ps health test reset up-full
+.PHONY: help up up-full down down-full clean clean-full logs ps health test reset
+
+COMPOSE_FILES = -f docker-compose.yml
+COMPOSE_FILES_FULL = -f docker-compose.yml \
+	-f extensions/logstash/logstash-compose.yml \
+	-f extensions/fleet-server/fleet-server-compose.yml \
+	-f extensions/apm-server/apm-server-compose.yml \
+	-f extensions/beats/beats-compose.yml \
+	-f extensions/synthetics/synthetics-compose.yml
 
 help:
 	@echo "Docker ELK Stack - Available commands:"
@@ -8,8 +16,10 @@ help:
 	@echo "  make up-full    - Start stack with all extensions (Logstash, Beats, Fleet, APM, Synthetics)"
 	@echo ""
 	@echo "Shutdown:"
-	@echo "  make down       - Stop all containers (keep data volumes)"
-	@echo "  make clean      - Stop all containers and remove all data volumes"
+	@echo "  make down       - Stop core stack (keep data volumes)"
+	@echo "  make down-full  - Stop core stack + all extensions (keep data volumes)"
+	@echo "  make clean      - Stop core stack and remove all data volumes"
+	@echo "  make clean-full - Stop core stack + extensions and remove all data volumes"
 	@echo ""
 	@echo "Monitoring:"
 	@echo "  make ps         - Show container status and health"
@@ -17,28 +27,41 @@ help:
 	@echo "  make health     - Check Elasticsearch cluster health"
 	@echo ""
 	@echo "Maintenance:"
-	@echo "  make reset      - Full reset: stop, remove all data, regenerate certs, restart"
+	@echo "  make reset      - Full reset: stop core, remove all data, regenerate certs, restart"
 	@echo ""
 	@echo "Examples:"
 	@echo "  make up && make logs"
+	@echo "  make up-full && make logs"
 	@echo "  make health"
-	@echo "  make clean"
+	@echo "  make down-full"
+	@echo "  make clean-full"
 
 up:
-	docker-compose up -d
+	docker compose $(COMPOSE_FILES) up -d
 	@echo "Stack starting... Run 'make logs' to follow progress"
 
+up-full:
+	@echo "Starting stack with all extensions..."
+	docker compose $(COMPOSE_FILES_FULL) up -d
+	@echo "Full stack starting... Run 'make logs' to follow progress"
+
 down:
-	docker-compose down
+	docker compose $(COMPOSE_FILES) down
+
+down-full:
+	docker compose $(COMPOSE_FILES_FULL) down
 
 clean:
-	docker-compose down -v
+	docker compose $(COMPOSE_FILES) down -v
+
+clean-full:
+	docker compose $(COMPOSE_FILES_FULL) down -v
 
 logs:
-	docker-compose logs -f
+	docker compose $(COMPOSE_FILES) logs -f
 
 ps:
-	docker-compose ps
+	docker compose $(COMPOSE_FILES) ps
 
 health:
 	@echo "Checking Elasticsearch cluster health..."
@@ -56,12 +79,3 @@ reset: clean
 	@echo "Starting fresh stack..."
 	@$(MAKE) up
 
-up-full:
-	@echo "Starting stack with all extensions..."
-	docker compose -f docker-compose.yml \
-		-f extensions/logstash/logstash-compose.yml \
-		-f extensions/fleet-server/fleet-server-compose.yml \
-		-f extensions/apm-server/apm-server-compose.yml \
-		-f extensions/beats/beats-compose.yml \
-		-f extensions/synthetics/synthetics-compose.yml up -d
-	@echo "Full stack starting... Run 'make logs' to follow progress"
