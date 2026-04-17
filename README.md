@@ -51,6 +51,8 @@ By default, the stack exposes the following ports:
 * 9200: Elasticsearch HTTP (first node only)
 * 5601: Kibana
 
+> **⚠️ Security Warning:** By default, these ports are accessible on all network interfaces (`0.0.0.0`). For local development only, this is fine. For any production or shared environment use, restrict access by modifying the port bindings in `docker-compose.yml` to `127.0.0.1:PORT:PORT` or use a firewall to limit access to trusted IPs only.
+
 > This docker compose is based on the official one provided by Elastic and available on Elasticsearch Guide [Install Elasticsearch with Docker][elasticsearch-docker] for development purpose. For production setups, we recommend users to set up their host according to the instructions from the Elasticsearch documentation: [Important System Configuration][es-sys-config].
 
 ## Usage

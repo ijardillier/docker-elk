@@ -1,3 +1,22 @@
+x-elasticsearch: &elasticsearch
+  image: docker.elastic.co/elasticsearch/elasticsearch:${ELASTIC_STACK_VERSION}
+  mem_limit: ${ES_MEM_LIMIT}
+  ulimits:
+    memlock:
+      soft: -1
+      hard: -1
+  networks:
+    - default
+  healthcheck:
+    test:
+      [
+        "CMD-SHELL",
+        "curl -s -I -u elastic:${ELASTIC_PASSWORD} --cacert config/certs/ca/ca.crt https://localhost:9200 | grep -q 'HTTP/1.1 200 OK'",
+      ]
+    interval: 10s
+    timeout: 10s
+    retries: 120
+
 services:
 
   setup:
@@ -92,10 +111,10 @@ services:
       retries: 120
 
   es01:
+    <<: *elasticsearch
     depends_on:
       setup:
         condition: service_healthy
-    image: docker.elastic.co/elasticsearch/elasticsearch:${ELASTIC_STACK_VERSION}
     container_name: es01
     hostname: es01
     volumes:
@@ -122,27 +141,11 @@ services:
       - xpack.security.http.ssl.certificate=certs/es01/es01.crt
       - xpack.security.transport.ssl.key=certs/es01/es01.key
       - xpack.security.transport.ssl.certificate=certs/es01/es01.crt
-    mem_limit: ${ES_MEM_LIMIT}
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-    networks:
-      - default
-    healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "curl -s -I -u elastic:${ELASTIC_PASSWORD} --cacert config/certs/ca/ca.crt https://localhost:9200 | grep -q 'HTTP/1.1 200 OK'",
-        ]
-      interval: 10s
-      timeout: 10s
-      retries: 120
 
   es02:
+    <<: *elasticsearch
     depends_on:
       - es01
-    image: docker.elastic.co/elasticsearch/elasticsearch:${ELASTIC_STACK_VERSION}
     container_name: es02
     hostname: es02
     volumes:
@@ -169,27 +172,11 @@ services:
       - xpack.security.http.ssl.certificate=certs/es02/es02.crt
       - xpack.security.transport.ssl.key=certs/es02/es02.key
       - xpack.security.transport.ssl.certificate=certs/es02/es02.crt
-    mem_limit: ${ES_MEM_LIMIT}
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-    networks:
-      - default
-    healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "curl -s -I -u elastic:${ELASTIC_PASSWORD} --cacert config/certs/ca/ca.crt https://localhost:9200 | grep -q 'HTTP/1.1 200 OK'",
-        ]
-      interval: 10s
-      timeout: 10s
-      retries: 120
 
   es03:
+    <<: *elasticsearch
     depends_on:
       - es02
-    image: docker.elastic.co/elasticsearch/elasticsearch:${ELASTIC_STACK_VERSION}
     container_name: es03
     hostname: es03
     volumes:
@@ -216,22 +203,6 @@ services:
       - xpack.security.http.ssl.certificate=certs/es03/es03.crt
       - xpack.security.transport.ssl.key=certs/es03/es03.key
       - xpack.security.transport.ssl.certificate=certs/es03/es03.crt
-    mem_limit: ${ES_MEM_LIMIT}
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-    networks:
-      - default
-    healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "curl -s -I -u elastic:${ELASTIC_PASSWORD} --cacert config/certs/ca/ca.crt https://localhost:9200 | grep -q 'HTTP/1.1 200 OK'",
-        ]
-      interval: 10s
-      timeout: 10s
-      retries: 120
 
   kibana:
     depends_on:
