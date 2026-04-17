@@ -24,6 +24,7 @@ With this project, you will be able to launch a complete Elastic stack:
       - [Linux](#linux)
   - [Usage](#usage)
     - [Bringing up the stack](#bringing-up-the-stack)
+    - [Monitoring startup](#monitoring-startup)
     - [Bringing up extensions](#bringing-up-extensions)
     - [Cleanup](#cleanup)
   - [Initial setup](#initial-setup)
@@ -68,6 +69,83 @@ $ docker-compose up
 You can also run all services in the background (detached mode) by adding the `-d` flag to the above command.
 
 If you are starting the stack for the very **first time**, please read the section below attentively.
+
+### Monitoring startup
+
+The stack takes **2–4 minutes** to initialize completely. Use these commands to monitor progress:
+
+**Check container health status:**
+```console
+$ docker-compose ps
+```
+
+Shows each service and its health state. Example output:
+```
+NAME        IMAGE                          COMMAND           SERVICE   STATUS           PORTS
+es00        docker.elastic.co/.../elasticsearch   bash -c '...'     setup     Exited (0)       
+es01        docker.elastic.co/.../elasticsearch   /bin/tini -- ...  es01      Up (healthy)     0.0.0.0:9200->9200/tcp
+es02        docker.elastic.co/.../elasticsearch   /bin/tini -- ...  es02      Up (healthy)     0.0.0.0:9201->9200/tcp
+es03        docker.elastic.co/.../elasticsearch   /bin/tini -- ...  es03      Up (healthy)     0.0.0.0:9202->9200/tcp
+kibana      docker.elastic.co/.../kibana          /bin/tini -- ...  kibana    Up (healthy)     0.0.0.0:5601->5601/tcp
+```
+
+**Follow logs in real-time:**
+```console
+$ docker-compose logs -f
+```
+
+Or follow a specific service:
+```console
+$ docker-compose logs -f kibana
+```
+
+**Startup stages:**
+
+1. **setup container** (10–30 seconds):
+   - Generates TLS certificates
+   - Sets up built-in user passwords
+   - Exits after completing (this is normal — exit code 0 means success)
+
+2. **Elasticsearch nodes** (20–60 seconds each):
+   - es01 starts first and waits for setup to complete
+   - es02 and es03 follow sequentially (es02 waits for es01, etc.)
+   - Each node shows `Up (healthy)` in `docker-compose ps` when ready
+   - Logs will show: `Node startup complete`
+
+3. **Kibana** (30–60 seconds after all ES nodes are healthy):
+   - Waits for all three ES nodes to be healthy (by design)
+   - Once healthy, accessible at `http://localhost:5601`
+
+**Check Elasticsearch cluster health:**
+```console
+$ curl -s -u elastic:changeme --cacert certs/ca/ca.crt https://localhost:9200/_cluster/health?pretty
+```
+
+Expected output once healthy:
+```json
+{
+  "cluster_name" : "docker-elk",
+  "status" : "green",
+  "timed_out" : false,
+  "number_of_nodes" : 3,
+  "number_of_data_nodes" : 3,
+  "active_primary_shards" : 0,
+  "active_shards" : 0,
+  "relocating_shards" : 0,
+  "initializing_shards" : 0,
+  "unassigned_shards" : 0,
+  "delayed_uninitialized_shards" : 0,
+  "number_of_pending_tasks" : 0,
+  "number_of_in_flight_fetch" : 0,
+  "task_max_waiting_in_queue_millis" : 0,
+  "active_shards_percent_as_number" : 100.0
+}
+```
+
+**Stack is ready when:**
+- All containers show `(healthy)` in `docker-compose ps`
+- Kibana is accessible at `http://localhost:5601`
+- ES cluster status is `green` and `number_of_nodes` is 3
 
 ### Bringing up extensions
 
